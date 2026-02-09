@@ -1,16 +1,23 @@
---- Count reviews ---
-SQL: SELECT COUNT(*) FROM reviews
-(4, 0, 0, 'SCAN reviews USING COVERING INDEX idx_reviews_rating_overall')
+================================================================================
+QUERY PERFORMANCE ANALYSIS
+================================================================================
 
---- Avg rating by hotel ---
-SQL: SELECT offering_id, AVG(rating_overall) FROM reviews GROUP BY offering_id
-(7, 0, 222, 'SCAN reviews USING INDEX idx_reviews_offering')
+Count all reviews:
+  Average: 0.27ms
+  Min: 0.08ms
+  Max: 0.96ms
 
---- Top 10 hotels ---
-SQL: SELECT offering_id, COUNT(*) AS n FROM reviews GROUP BY offering_id ORDER BY n DESC LIMIT 10
-(8, 0, 207, 'SCAN reviews USING COVERING INDEX idx_reviews_offering')
-(42, 0, 0, 'USE TEMP B-TREE FOR ORDER BY')
+Avg rating by hotel:
+  Average: 28.68ms
+  Min: 17.40ms
+  Max: 55.24ms
 
---- Reviews with rating >= 4 ---
-SQL: SELECT * FROM reviews WHERE rating_overall >= 4 LIMIT 1000
-(4, 0, 202, 'SEARCH reviews USING INDEX idx_reviews_rating_overall (rating_overall>?)')
+Filter by rating >= 4:
+  Average: 5.52ms
+  Min: 5.29ms
+  Max: 5.67ms
+
+Complex aggregation:
+  Average: 28.16ms
+  Min: 17.43ms
+  Max: 35.46ms

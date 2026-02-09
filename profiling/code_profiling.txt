@@ -1,38 +1,38 @@
-         18133 function calls (17860 primitive calls) in 0.079 seconds
+         18165 function calls (17892 primitive calls) in 0.114 seconds
 
    Ordered by: cumulative time
-   List reduced from 1108 to 30 due to restriction <30>
+   List reduced from 1027 to 30 due to restriction <30>
 
    ncalls  tottime  percall  cumtime  percall filename:lineno(function)
-        3    0.000    0.000    0.079    0.026 interactiveshell.py:3665(run_code)
-      4/3    0.000    0.000    0.079    0.026 {built-in method builtins.exec}
-        1    0.000    0.000    0.049    0.049 benchmarking.py:13(get_reviews_df)
-        1    0.001    0.001    0.048    0.048 sql.py:572(read_sql)
-        1    0.000    0.000    0.044    0.044 sql.py:1791(read_query)
-        3    0.000    0.000    0.030    0.010 result.py:1331(fetchall)
-        3    0.002    0.001    0.030    0.010 result.py:555(_allrows)
-        1    0.000    0.000    0.029    0.029 3799795350.py:1(<module>)
-        1    0.000    0.000    0.029    0.029 benchmarking.py:23(comparable_groups_by_volume_and_rating)
-        3    0.000    0.000    0.028    0.009 cursor.py:2251(_fetchall_impl)
-        3    0.001    0.000    0.028    0.009 cursor.py:1191(fetchall)
-        3    0.027    0.009    0.027    0.009 {method 'fetchall' of 'sqlite3.Cursor' objects}
-        1    0.000    0.000    0.018    0.018 generic.py:1420(aggregate)
-        1    0.000    0.000    0.014    0.014 sql.py:196(_wrap_result)
-        1    0.003    0.003    0.013    0.013 sql.py:162(_convert_arrays_to_dataframe)
-        1    0.000    0.000    0.009    0.009 apply.py:172(agg)
-        1    0.000    0.000    0.009    0.009 apply.py:415(agg_dict_like)
-        1    0.000    0.000    0.009    0.009 apply.py:1570(agg_or_apply_dict_like)
-    29/27    0.001    0.000    0.008    0.000 base.py:475(__new__)
+        3    0.000    0.000    0.114    0.038 interactiveshell.py:3665(run_code)
+        3    0.000    0.000    0.114    0.038 {built-in method builtins.exec}
+        1    0.000    0.000    0.077    0.077 benchmarking.py:17(get_reviews_df)
+        1    0.001    0.001    0.075    0.075 sql.py:572(read_sql)
+        1    0.000    0.000    0.071    0.071 sql.py:1791(read_query)
+        3    0.000    0.000    0.049    0.016 result.py:1331(fetchall)
+        3    0.003    0.001    0.049    0.016 result.py:555(_allrows)
+        3    0.000    0.000    0.046    0.015 cursor.py:2251(_fetchall_impl)
+        3    0.002    0.001    0.046    0.015 cursor.py:1191(fetchall)
+        3    0.044    0.015    0.044    0.015 {method 'fetchall' of 'sqlite3.Cursor' objects}
+        1    0.000    0.000    0.037    0.037 3799795350.py:1(<module>)
+        1    0.000    0.000    0.037    0.037 benchmarking.py:429(comparable_groups_by_volume_and_rating)
+        1    0.000    0.000    0.022    0.022 generic.py:1420(aggregate)
+        1    0.000    0.000    0.021    0.021 sql.py:196(_wrap_result)
+        1    0.005    0.005    0.019    0.019 sql.py:162(_convert_arrays_to_dataframe)
+        1    0.000    0.000    0.013    0.013 apply.py:172(agg)
+        1    0.000    0.000    0.012    0.012 apply.py:415(agg_dict_like)
+        1    0.000    0.000    0.012    0.012 apply.py:1570(agg_or_apply_dict_like)
+        1    0.000    0.000    0.010    0.010 construction.py:1006(convert_object_array)
+       13    0.009    0.001    0.010    0.001 construction.py:1028(convert)
+    29/27    0.001    0.000    0.009    0.000 base.py:475(__new__)
+        1    0.000    0.000    0.008    0.008 apply.py:425(compute_dict_like)
         1    0.000    0.000    0.007    0.007 apply.py:1638(reconstruct_func)
         1    0.000    0.000    0.007    0.007 apply.py:1733(normalize_keyword_aggregation)
-        1    0.000    0.000    0.007    0.007 construction.py:1006(convert_object_array)
-       12    0.007    0.001    0.007    0.001 construction.py:1028(convert)
-        1    0.000    0.000    0.007    0.007 apply.py:425(compute_dict_like)
+     10/5    0.000    0.000    0.007    0.001 generic.py:232(aggregate)
+        5    0.000    0.000    0.007    0.001 generic.py:331(_aggregate_multiple_funcs)
+        6    0.000    0.000    0.007    0.001 frame.py:698(__init__)
+        6    0.000    0.000    0.006    0.001 construction.py:423(dict_to_mgr)
         5    0.000    0.000    0.006    0.001 categorical.py:3046(factorize_from_iterable)
-        2    0.000    0.000    0.006    0.003 multi.py:216(new_meth)
-        2    0.000    0.000    0.006    0.003 multi.py:546(from_tuples)
-        5    0.000    0.000    0.006    0.001 categorical.py:371(__init__)
-        2    0.000    0.000    0.006    0.003 multi.py:475(from_arrays)
-     10/5    0.000    0.000    0.005    0.001 generic.py:232(aggregate)
+        2    0.000    0.000    0.006    0.003 series.py:4808(apply)
 
 

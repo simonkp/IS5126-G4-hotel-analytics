@@ -108,6 +108,8 @@ def run_full_etl(
     json_path: Path | None = None,
     db_path: Path | None = None,
     dry_run: int | None = None,
+    filter_latest_years: bool = True,
+    target_reviews: int= 80000,
 ) -> tuple[int, int, int]:
     """
     Stream JSONL into SQLite. Drops and recreates tables.
@@ -119,6 +121,41 @@ def run_full_etl(
         raise FileNotFoundError(f"{json_path} not found. Place review.json there or set REVIEW_JSON_PATH.")
     db_path.parent.mkdir(parents=True, exist_ok=True)
     engine = create_engine(f"sqlite:///{db_path}", future=True)
+    
+    cutoff_year = None
+    sample_rate = 1.0
+    if filter_latest_years:
+        print("Pass 1: Scanning for date range...")
+        years = []
+        with open(json_path, "r", encoding="utf-8", errors="replace") as f:
+            for i, line in enumerate(tqdm(f, desc="Scanning")):
+                try:
+                    rec = json.loads(line.strip())
+                    year = parse_review_year(rec.get("date"))
+                    if year:
+                        years.append(year)
+                except:
+                    continue
+        
+        if years:
+            max_year = max(years)
+            cutoff_year = max_year - (LATEST_YEARS - 1)
+            
+            # Count reviews in range
+            reviews_in_range = sum(1 for y in years if y >= cutoff_year)
+            
+            print(f"\nDataset year range: {min(years)}-{max_year}")
+            print(f"Filtering to: {cutoff_year}-{max_year} ({LATEST_YEARS} years)")
+            print(f"Reviews in range: ~{reviews_in_range:,}")
+            
+            # Calculate sampling if needed
+            if reviews_in_range > MAX_REVIEWS:
+                sample_rate = target_reviews / reviews_in_range
+                print(f"Sampling {sample_rate:.1%} to target {target_reviews:,} reviews")
+            else:
+                print(f"No sampling needed ({reviews_in_range:,} < {MAX_REVIEWS:,})")
+        else:
+            print("Could not determine date range")
 
     if dry_run is None:
         with engine.connect() as conn:
@@ -143,8 +180,13 @@ def run_full_etl(
     authors_batch: list[dict] = []
     reviews_batch: list[dict] = []
     lines_read = 0
+    skipped_date = 0
+    skipped_sample = 0
     errors = 0
     total_inserted = 0
+    
+    import random
+    random.seed(42)
 
     def flush() -> None:
         nonlocal total_inserted
@@ -169,6 +211,8 @@ def run_full_etl(
         total_inserted += len(reviews_batch)
         authors_batch.clear()
         reviews_batch.clear()
+    
+    print("\nPass 2: Loading data...")
 
     with open(json_path, "r", encoding="utf-8", errors="replace") as f:
         if dry_run is not None:
@@ -192,15 +236,35 @@ def run_full_etl(
             except json.JSONDecodeError:
                 errors += 1
                 continue
+            if cutoff_year is not None:
+                year = parse_review_year(rec.get("date"))
+                if year is None or year < cutoff_year:
+                    skipped_date += 1
+                    continue
+            
+            # Sample if needed
+            if sample_rate < 1.0:
+                if random.random() > sample_rate:
+                    skipped_sample += 1
+                    continue
+            
             author_row, review_row = _row_from_record(rec)
             if author_row is None or review_row is None:
                 errors += 1
                 continue
+            
             authors_batch.append(author_row)
             reviews_batch.append(review_row)
+            
             if len(reviews_batch) >= BATCH_SIZE:
                 flush()
-            pbar.set_postfix(inserted=total_inserted + len(reviews_batch), err=errors)
+            
+            pbar.set_postfix(
+                inserted=total_inserted + len(reviews_batch),
+                skip_date=skipped_date,
+                skip_sample=skipped_sample,
+                err=errors
+            )
     flush()
     return lines_read, total_inserted, errors
 
@@ -312,10 +376,16 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Data processing: full ETL or sample DB.")
     parser.add_argument("--full-etl", action="store_true", help="Stream review.json into SQLite (reviews.db).")
     parser.add_argument("--dry-run", type=int, metavar="N", help="With --full-etl: only read first N lines.")
+    parser.add_argument("--target-reviews", type=int, default=80000, help="Target review count (default: 80,000)")
+    parser.add_argument("--no-filter", action="store_true", help="Disable date filtering")
     args = parser.parse_args()
     if args.full_etl:
         try:
-            lines_read, total_inserted, errors = run_full_etl(dry_run=args.dry_run)
+            lines_read, total_inserted, errors = run_full_etl(
+                dry_run=args.dry_run,
+                filter_latest_years=not args.no_filter,
+                target_reviews=args.target_reviews
+            )
             print(f"Lines read: {lines_read}, inserted: {total_inserted}, errors: {errors}")
             return 0
         except Exception as e:
