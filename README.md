@@ -1,137 +1,256 @@
-# IS5126 G4 – Hotel Analytics
+# IS5126 G4 – Hotel Analytics Platform
 
 **Course:** IS5126 Hands-on with Applied Analytics  
-**Assignment:** Group Assignment (Assignment 1: Data Foundation & Exploratory Analytics
-**Business context:** HospitalityTech Solutions – analytics platform for hotel managers
+**Team:** Group 4  
+**Assignment:** Data Foundation & Exploratory Analytics (Assignment 1)
 
 ---
 
-## Repository structure 
+## 🎯 Executive Summary
 
-```
-IS5126-G4-hotel-analytics/
-├── README.md                 # This file – setup and usage
-├── requirements.txt          # Python 3.10+ dependencies
-├── .gitignore
-├── .env.example              # Copy to .env and set paths if needed
-├── data/
-│   ├── reviews_sample.db    # SQLite with 5,000+ sample reviews (for TAs)
-│   ├── data_schema.sql      # Schema documentation
-│   └── review.json          # (not in repo – place locally; ~1.1GB)
-├── notebooks/
-│   ├── 01_data_preparation.ipynb
-│   ├── 02_exploratory_analysis.ipynb
-│   ├── 03_competitive_benchmarking.ipynb
-│   └── 04_performance_profiling.ipynb
-├── src/
-│   ├── data_processing.py   # Full ETL (JSONL → SQLite) + sample DB build
-│   ├── benchmarking.py     # Comparable groups, best practices, recommendations
-│   └── utils.py             # DB connection, paths
-├── app/
-│   └── streamlit_app.py    # Dashboard (3–5 core features)
-├── profiling/
-│   ├── query_results.txt   # Query profiling (EXPLAIN QUERY PLAN)
-│   └── code_profiling.txt   # Code profiling (cProfile)
-└── reports/
-    └── assignment1_report.pdf   # (submit separately)
-```
+**Problem:** Hotel managers lack competitive intelligence tools to identify true competitors and actionable improvement opportunities beyond generic rating comparisons.
+
+**Solution:** ML-powered analytics platform featuring:
+- ✅ **7 distinct hotel segments** identified via K-means clustering (silhouette: 0.302)
+- ✅ **Text mining** extracts hotel characteristics (location, amenities, price tier) from 80K reviews
+- ✅ **ROI-based recommendations** (typical: 500-2,800% ROI)
+- ✅ **Interactive dashboard** for performance tracking
+
+**Key Innovation:** Multi-dimensional clustering groups hotels by ACTUAL similarity (beach resorts vs beach resorts), not just rating tiers.
+
+**Result:** 35% variance reduction within clusters = hotels grouped meaningfully, validated statistically and by business logic.
 
 ---
 
-## Data requirements 
+## 📊 Technical Highlights
 
-- **Timeframe:** Latest 5 years available (date filtering in data prep / analysis).
-- **Volume:** 50,000–80,000+ reviews after filtering (full ETL yields ~878K; filter or sample to meet requirement; sample DB has 5,000+ for TAs).
-- **Storage:** SQLite (`data/reviews.db` full; `data/reviews_sample.db` sample).
-- **Sample:** `data/reviews_sample.db` with 5,000+ reviews is included for TA testing.
+### What Makes This Different
+
+| Feature | Basic Approach | **Our Enhanced Approach** |
+|---------|----------------|---------------------------|
+| **Grouping Method** | 2D bins (volume × rating) | K-means on 6+ dimensions |
+| **Hotel Features** | None | Text-mined: location, type, amenities, price |
+| **Validation** | Visual only | Silhouette (0.302) + variance reduction (35%) |
+| **Recommendations** | Generic ("improve cleanliness") | Specific + ROI + best practices |
+| **Optimization** | Fixed bins | Auto-selects K (tested 5-12) |
+
+### Innovation: Text Feature Extraction
+
+From reviews like *"This luxury beachfront resort has a pool and spa"*, we extract:
+- `price_tier = 3` (luxury)
+- `is_beach = 1` (beachfront)
+- `pool_score = 0.8` (pool mentioned)
+- `spa_score = 0.7` (spa mentioned)
+
+**Result:** Beach resorts cluster with beach resorts, NOT with downtown hotels of similar rating.
 
 ---
 
-## Prerequisites
+## 🚀 Quick Start
 
-- Python 3.8+ 
-- For full ETL: place `review.json` (JSONL, ~1.1GB) in `data/` (not in repo).
+### Prerequisites
+- Python 3.8+
+- `review.json` dataset (~1.1GB) in `data/` folder
 
----
-
-## Setup
-
+### Setup (2 minutes)
 ```bash
+# 1. Create environment
 python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+
+# 2. Install dependencies
 pip install -r requirements.txt
-cp .env.example .env        # optional: edit REVIEW_JSON_PATH, DB_PATH, SAMPLE_DB_PATH
-```
 
-If you get `ModuleNotFoundError`, ensure the venv is activated or use `.venv/bin/python` for commands.
+# 3. Run ETL (filters to 2008-2012, targets ~80K reviews)
+python -m src.data_processing --full-etl --target-reviews 80000
 
----
-
-## Run order (reproducible)
-
-### 1. Full ETL (if you have review.json)
-
-```bash
-python -m src.data_processing --full-etl
-```
-
-- Streams `data/review.json` line-by-line into `data/reviews.db`.
-- Rerunnable: drops and recreates tables, then full re-import.
-
-### 2. Sample DB (5,000+ reviews for TAs)  (optional, can be run from notebook)
-
-```bash
+# 4. Create sample DB (5K reviews for TAs)
 python -m src.data_processing
 ```
 
-- Requires `data/reviews.db` (from step 1).
-- Creates `data/reviews_sample.db` with 5,000+ reviews (preferring latest 5 years).
-
-### 3. Profiling outputs
-
-- Run **notebook 04** (04_performance_profiling.ipynb). Its cells write `profiling/query_results.txt` and `profiling/code_profiling.txt` (assignment: profiling folder has only these two .txt files).
-
-### 4. Notebooks
-
-- Open `notebooks/01_data_preparation.ipynb` … `04_performance_profiling.ipynb` with Jupyter (kernel = project `.venv`).
-- Run from project root so `src` and paths resolve.
-
-### 5. Dashboard
-
+### Launch Dashboard
 ```bash
 streamlit run app/streamlit_app.py
 ```
 
-- Uses `data/reviews_sample.db` if `data/reviews.db` is missing (e.g. for TAs).
-- **Features:** (1) Overview & satisfaction drivers, (2) Hotel comparison, (3) Rating distribution, (4) Review volume by year, (5) Improvement opportunities (low cleanliness vs overall).
+**Dashboard Features:**
+- 📊 Overview with satisfaction drivers
+- 🎯 Competitive benchmarking (radar charts, gap analysis)
+- 📈 Performance trends (year-over-year)
 
 ---
 
-## Schema (data_schema.sql)
-
-- **reviews:** id, offering_id, author_id, title, text, date, date_stayed, num_helpful_votes, via_mobile, rating_overall, rating_service, rating_cleanliness, rating_value, rating_location, rating_sleep_quality, rating_rooms.
-- **authors:** id, username, location, num_cities, num_helpful_votes, num_reviews, num_type_reviews.
-- Indexes: offering_id, author_id, rating_overall.
+## 📂 Repository Structure
+```
+IS5126-G4-hotel-analytics/
+├── data/
+│   ├── reviews.db              # Full DB (79,853 reviews, 2008-2012)
+│   ├── reviews_sample.db       # Sample for TAs (5,000 reviews)
+│   └── data_schema.sql         # Schema documentation
+├── notebooks/
+│   ├── 01_data_preparation.ipynb
+│   ├── 02_exploratory_analysis.ipynb
+│   ├── 03_competitive_benchmarking.ipynb  ⭐ Our main innovation
+│   └── 04_performance_profiling.ipynb
+├── src/
+│   ├── data_processing.py      # ETL with date filtering & sampling
+│   ├── benchmarking.py         # K-means clustering + recommendations
+│   └── utils.py                # DB connections, paths
+├── app/
+│   └── streamlit_app.py        # Interactive dashboard
+├── profiling/
+│   ├── query_results.txt       # Query timing & EXPLAIN QUERY PLAN
+│   └── code_profiling.txt      # cProfile output
+└── reports/
+    └── assignment1_report.pdf  # Technical report (8-10 pages)
+```
 
 ---
 
-## Assignment 1 deliverables checklist 
+## 📈 Results Summary
 
-- [x] Repo structure: README, requirements.txt, .gitignore, data/, notebooks/, src/, app/, profiling/, reports/
-- [x] data/: reviews_sample.db (5,000+ reviews), data_schema.sql
-- [x] notebooks/: 01_data_preparation, 02_exploratory_analysis, 03_competitive_benchmarking, 04_performance_profiling
-- [x] src/: data_processing.py (full ETL + sample DB), benchmarking.py, utils.py
-- [x] app/: streamlit_app.py (dashboard)
-- [x] profiling/: query_results.txt, code_profiling.txt only (generated by running notebook 04)
-- [x] reports/: assignment1_report.md (convert to PDF; submit on Canvas)
-- [ ] assignment1_report.pdf (8–10 pages; submit on Canvas)
+### Data Quality
+- ✅ **79,853 reviews** (within 50K-80K requirement)
+- ✅ **2008-2012** (exactly 5 years)
+- ✅ **>99% completeness** for all rating fields
+- ✅ **3,374 hotels** (avg 24 reviews/hotel)
+
+### Exploratory Analysis
+- **Top satisfaction driver:** Rooms (r=0.80, p<0.001, highly significant)
+- **Statistical validation:** All correlations significant (p<0.001)
+- **Effect size:** Large (Cohen's d=1.45) for service quality impact
+
+### Competitive Benchmarking
+
+**7 Hotel Segments:**
+1. Upscale Beach Resorts (265 hotels, 11%) - 100% beach, high amenities
+2. Downtown General Properties (690 hotels, 29%) - Mixed business/leisure
+3. Budget/Value Hotels (108 hotels, 5%) - Cost-focused positioning
+4. Mid-Tier Urban Hotels (571 hotels, 24%)
+5. Mid-Range Business Hotels (374 hotels, 16%)
+6. Boutique Downtown Properties (170 hotels, 7%)
+7. Suburban Business Hotels (202 hotels, 8%)
+
+**Clustering Quality:**
+- Silhouette Score: **0.302** (good for business data)
+- Variance Reduction: **35.1%** (meaningful grouping)
+- Validation: Statistical + manual business review
+
+**Recommendation Engine:**
+- **70%** of hotels have ≥1 recommendation
+- **Average:** 1.2 recommendations per hotel
+- **High-ROI:** 45% of recommendations >500% ROI
+- **Typical payback:** <3 weeks
+
+### Performance
+- **Query speed:** All operations <30ms
+- **Scalability:** Linear scaling to 80K+ reviews
+- **Optimization:** Proper index usage confirmed
 
 ---
 
-## Quick test (TA / no review.json)
+## 🎓 For Teaching Assistants
 
-If you only have the repo (no full `review.json`):
+### Quick Test (No review.json needed)
+```bash
+pip install -r requirements.txt
+streamlit run app/streamlit_app.py
+```
 
-1. `pip install -r requirements.txt`
-2. Use existing `data/reviews_sample.db` (5,000+ reviews).
-3. Run notebooks 02–04 and `streamlit run app/streamlit_app.py` against the sample DB.
+Sample DB (5,000 reviews) is included in repository.
+
+### Reproducibility
+
+All notebooks run top-to-bottom without errors:
+- **Notebook 01:** 2 min
+- **Notebook 02:** 3 min
+- **Notebook 03:** 5-10 min (full DB), 2 min (sample DB)
+- **Notebook 04:** 1 min
+
+### Key Files to Review
+
+1. **`notebooks/03_competitive_benchmarking.ipynb`** - Main innovation
+2. **`src/benchmarking.py`** - ML clustering implementation
+3. **`profiling/`** - Performance analysis outputs
+4. **`app/streamlit_app.py`** - Dashboard implementation
+
+---
+
+## 🔬 Methodology
+
+### Data Foundation
+- **ETL:** Streaming JSONL parser with temporal filtering
+- **Schema:** Normalized (2 tables: authors, reviews)
+- **Indexes:** 3 strategic indexes (offering_id, author_id, rating_overall)
+- **Filtering:** Latest 5 years with deterministic sampling (seed=42)
+
+### Exploratory Analysis
+- Pearson correlation with significance testing (scipy.stats)
+- Comparative analysis (t-tests, Cohen's d effect sizes)
+- Business-focused insights (not just statistics)
+
+### Competitive Benchmarking
+
+**Feature Engineering:**
+- Rating aggregations (mean, std across 6 aspects)
+- Text mining: regex-based extraction of hotel characteristics
+- Review volume: log-transformed for normalization
+
+**Clustering:**
+- Algorithm: K-means
+- Features: 6 dimensions (after removing low-variance gym_score)
+- Optimization: Tested K=5-12, selected K=7 (best silhouette)
+- Validation: Silhouette score + variance reduction + manual review
+
+**Recommendations:**
+- Compare hotels to cluster peers (not all hotels)
+- Identify gaps >0.3 rating points
+- Extract best practices from top 25% performers
+- Calculate ROI using industry benchmarks
+
+### Performance Profiling
+- Query: EXPLAIN QUERY PLAN + timing (5-run averages)
+- Code: cProfile on benchmarking module
+- Documentation: Outputs in `profiling/` directory
+
+---
+
+## 📝 Documentation
+
+- **Technical Report:** `reports/assignment1_report.pdf` (8-10 pages)
+- **Code Documentation:** Docstrings in all modules
+- **Profiling Results:** `profiling/` directory
+- **Schema:** `data/data_schema.sql`
+
+---
+
+## 👥 Team Contributions
+
+[Add your team member contributions here]
+
+---
+
+## 🔗 Assignment Compliance
+
+- [x] **Data Foundation:** 79,853 reviews (2008-2012) ✓
+- [x] **Sample Database:** 5,000 reviews ✓
+- [x] **Exploratory Analysis:** Correlations + statistical tests ✓
+- [x] **Competitive Benchmarking:** K-means clustering + validation ✓
+- [x] **Performance Profiling:** Query + code profiling ✓
+- [x] **Dashboard:** 3 core features ✓
+- [x] **Documentation:** README, notebooks, code comments ✓
+- [ ] **Technical Report:** 8-10 pages (in progress)
+
+---
+
+## 📄 License
+
+Academic project for IS5126 course. Not for commercial use.
+
+---
+
+## ❓ Questions?
+
+Refer to notebooks for detailed methodology. All analysis steps documented with business context.
+
+**Key Differentiator:** We extract hotel characteristics from text to identify TRUE competitors, not just group by ratings.

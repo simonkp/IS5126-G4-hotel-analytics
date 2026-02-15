@@ -1,23 +1,30 @@
 ================================================================================
-QUERY PERFORMANCE ANALYSIS
+QUERY PERFORMANCE TIMING
 ================================================================================
 
 Count all reviews:
-  Average: 0.27ms
-  Min: 0.08ms
-  Max: 0.96ms
+  Average: 10.87ms
+  Min:     0.12ms
+  Max:     53.53ms
 
 Avg rating by hotel:
-  Average: 28.68ms
-  Min: 17.40ms
-  Max: 55.24ms
+  Average: 2046.15ms
+  Min:     883.64ms
+  Max:     6228.12ms
 
 Filter by rating >= 4:
-  Average: 5.52ms
-  Min: 5.29ms
-  Max: 5.67ms
+  Average: 16.31ms
+  Min:     9.82ms
+  Max:     20.55ms
 
 Complex aggregation:
-  Average: 28.16ms
-  Min: 17.43ms
-  Max: 35.46ms
+  Average: 1034.93ms
+  Min:     965.46ms
+  Max:     1109.53ms
+
+================================================================================
+SUMMARY
+================================================================================
+All queries < 200ms: ✗ NO
+Slowest query: Avg rating by hotel
+  Time: 2046.15ms

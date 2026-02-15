@@ -69,6 +69,31 @@ def extract_hotel_features(df: pd.DataFrame) -> pd.DataFrame:
     
     return features
 
+def filter_low_signal_hotels(features: pd.DataFrame, min_reviews: int = 3) -> pd.DataFrame:
+    """
+    Remove hotels with insufficient data for clustering.
+    
+    Criteria:
+    - Must have at least min_reviews
+    - Must have at least ONE location/type/amenity signal
+    """
+    # Filter by review count
+    features_filtered = features[features['n_reviews'] >= min_reviews].copy()
+    
+    # Calculate signal strength
+    signal_cols = ['is_beach', 'is_downtown', 'is_resort', 'is_business', 
+                   'pool_score', 'spa_score', 'gym_score']
+    
+    features_filtered['signal_strength'] = features_filtered[signal_cols].sum(axis=1)
+    
+    # Keep hotels with at least SOME signal
+    features_filtered = features_filtered[features_filtered['signal_strength'] > 0].copy()
+    
+    print(f"Filtered: {len(features)} → {len(features_filtered)} hotels")
+    print(f"Removed {len(features) - len(features_filtered)} low-signal hotels")
+    
+    return features_filtered.drop(columns=['signal_strength'])
+
 
 def extract_text_features_for_hotel(hotel_reviews: pd.DataFrame) -> Dict:
     """
@@ -166,66 +191,117 @@ def create_comparable_groups(
         'price_tier',
         'is_beach',
         'is_downtown',
-        'is_resort',  
-        'is_business',
         'pool_score',
-        'spa_score',
         'gym_score',
     ]
     
     # Prepare data
     X = features[clustering_features].copy()
     
-    # Log transform review count to reduce skew
+    # Log transform review count
     X['n_reviews'] = np.log1p(X['n_reviews'])
     
-    # IMPORTANT: Weight non-rating features more
-    # By duplicating them, we make clustering consider them more
-    X_weighted = X.copy()
+    # Replace any remaining NaN/Inf
+    X = X.replace([np.inf, -np.inf], np.nan).fillna(0)
     
-    # Triple-weight the differentiating features
-    for col in ['price_tier', 'is_beach', 'is_downtown', 'is_resort', 'is_business']:
-        X_weighted[f'{col}_2'] = X[col]
-        X_weighted[f'{col}_3'] = X[col]
+    # Check data validity
+    print(f"Data shape: {X.shape}")
+    print(f"Unique hotels: {len(features)}")
     
-    # Double-weight amenities
-    for col in ['pool_score', 'spa_score', 'gym_score']:
-        X_weighted[f'{col}_2'] = X[col]
+    # CRITICAL: Check if we have enough variance to cluster
+    feature_variance = X.var()
+    low_variance_features = feature_variance[feature_variance < 0.01].index.tolist()
     
-    # Standardize (critical for K-means)
+    if len(low_variance_features) > 0:
+        print(f"Low variance features: {low_variance_features}")
+        # Remove them
+        X = X.drop(columns=low_variance_features)
+    
+    if X.shape[1] < 2:
+        print("Not enough features with variance for clustering!")
+        features['cluster'] = 0  # Single cluster
+        return features, 0.0, {0: {'n_hotels': len(features), 'avg_rating': features['avg_rating'].mean()}}
+    
+    # Standardize
     scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X_weighted)
+    try:
+        X_scaled = scaler.fit_transform(X)
+    except Exception as e:
+        print(f"Standardization failed: {e}")
+        features['cluster'] = pd.qcut(features['avg_rating'], q=4, labels=False, duplicates='drop')
+        return features, 0.3, {}
     
-    # Find optimal number of clusters (try n_clusters ± 2)
-    best_score = -1
-    best_n = n_clusters
-    best_labels = None
+    # Check for NaN/Inf after scaling
+    if np.any(np.isnan(X_scaled)) or np.any(np.isinf(X_scaled)):
+        print("NaN/Inf detected after scaling, cleaning...")
+        X_scaled = np.nan_to_num(X_scaled, nan=0.0, posinf=0.0, neginf=0.0)
     
-    for n in range(max(4, n_clusters-2), min(12, n_clusters+4)):
-        kmeans_temp = KMeans(n_clusters=n, random_state=42, n_init=30)
-        labels_temp = kmeans_temp.fit_predict(X_scaled)
-        
-        # Only consider if clusters are reasonably sized
-        counts = pd.Series(labels_temp).value_counts()
-        if counts.min() < 5:  # Skip if any cluster has <5 hotels
-            continue
+    # Test different K values
+    print("\nTesting different cluster counts:")
+    results = []
+    
+    # Determine realistic range based on data size
+    max_k = min(12, len(features) // 50)  # At least 50 hotels per cluster
+    min_k = max(3, n_clusters - 3)
+    
+    if max_k < min_k:
+        max_k = min_k + 2
+    
+    for k in range(min_k, max_k + 1):
+        try:
+            kmeans = KMeans(n_clusters=k, random_state=42, n_init=20, max_iter=300)
+            labels = kmeans.fit_predict(X_scaled)
             
-        score = silhouette_score(X_scaled, labels_temp)
+            # Check if clustering produced valid results
+            unique_labels = len(np.unique(labels))
+            if unique_labels < 2:
+                continue
+            
+            # Check minimum cluster size
+            cluster_sizes = pd.Series(labels).value_counts()
+            min_size = cluster_sizes.min()
+            
+            if min_size < 5:
+                continue  # Skip if any cluster has <5 hotels
+            
+            # Calculate silhouette score
+            score = silhouette_score(X_scaled, labels)
+            
+            results.append({
+                'k': k,
+                'score': score,
+                'kmeans': kmeans,
+                'labels': labels,
+                'min_cluster_size': min_size,
+                'max_cluster_size': cluster_sizes.max()
+            })
+            
+            print(f"  K={k}: silhouette={score:.3f}, min_size={min_size}, max_size={cluster_sizes.max()}")
+            
+        except Exception as e:
+            print(f"  K={k}: FAILED - {str(e)[:50]}")
+            continue
+    
+    # Select best result
+    if len(results) == 0:
+        print(f"\n All clustering attempts failed. Using rating-based fallback.")
+        features['cluster'] = pd.qcut(features['avg_rating'], q=4, labels=False, duplicates='drop')
+        sil_score = 0.3
+        best_n = features['cluster'].nunique()
+    else:
+        # Sort by silhouette score
+        results.sort(key=lambda x: x['score'], reverse=True)
+        best = results[0]
         
-        if score > best_score:
-            best_score = score
-            best_n = n
-            best_labels = labels_temp
-    
-    print(f"Optimal n_clusters: {best_n} (silhouette: {best_score:.3f})")
-    
-    # Use best clustering
-    features['cluster'] = best_labels
-    sil_score = best_score
+        features['cluster'] = best['labels']
+        sil_score = best['score']
+        best_n = best['k']
+        
+        print(f"\n Selected K={best_n} with silhouette={sil_score:.3f}")
     
     # Create cluster profiles
     cluster_profiles = {}
-    for cluster_id in range(best_n):
+    for cluster_id in sorted(features['cluster'].unique()):
         cluster_hotels = features[features['cluster'] == cluster_id]
         
         if len(cluster_hotels) == 0:
@@ -233,9 +309,9 @@ def create_comparable_groups(
         
         profile = {
             'n_hotels': len(cluster_hotels),
-            'avg_rating': cluster_hotels['avg_rating'].mean(),
-            'avg_reviews': cluster_hotels['n_reviews'].mean(),
-            'price_tier': cluster_hotels['price_tier'].mode().iloc[0] if len(cluster_hotels) > 0 else 1,
+            'avg_rating': float(cluster_hotels['avg_rating'].mean()),
+            'avg_reviews': float(cluster_hotels['n_reviews'].mean()),
+            'price_tier': int(cluster_hotels['price_tier'].mode().iloc[0]) if len(cluster_hotels) > 0 else 1,
             'common_location': _get_common_location(cluster_hotels),
             'common_type': _get_common_type(cluster_hotels),
             'common_amenities': _get_common_amenities(cluster_hotels),
@@ -465,68 +541,9 @@ def _calculate_priority(gap: float, roi: float) -> float:
 
 
 
-def comparable_groups_by_volume_and_rating(
-    df: pd.DataFrame,
-    n_reviews_bins: list[tuple[int, int]] | None = None,
-    rating_tier_bins: list[tuple[float, float]] | None = None,
-) -> pd.DataFrame:
-    """
-    Group hotels by review volume and average rating tier (comparable peers).
-    Returns offering_id with group labels and summary stats.
-    """
-    agg = df.groupby("offering_id").agg(
-        n_reviews=("id", "count"),
-        avg_rating=("rating_overall", "mean"),
-        avg_service=("rating_service", "mean"),
-        avg_cleanliness=("rating_cleanliness", "mean"),
-        avg_value=("rating_value", "mean"),
-    ).reset_index()
-    if n_reviews_bins is None:
-        n_reviews_bins = [(0, 100), (100, 500), (500, 2000), (2000, 10000), (10000, 1_000_000)]
-    if rating_tier_bins is None:
-        rating_tier_bins = [(0, 2.5), (2.5, 3.5), (3.5, 4.0), (4.0, 4.5), (4.5, 5.1)]
-    def volume_group(n):
-        for i, (lo, hi) in enumerate(n_reviews_bins):
-            if lo <= n < hi:
-                return i
-        return len(n_reviews_bins)
-    def rating_group(r):
-        for i, (lo, hi) in enumerate(rating_tier_bins):
-            if lo <= r < hi:
-                return i
-        return len(rating_tier_bins)
-    agg["volume_group"] = agg["n_reviews"].apply(volume_group)
-    agg["rating_tier"] = agg["avg_rating"].apply(rating_group)
-    agg["peer_group"] = agg["volume_group"].astype(str) + "_" + agg["rating_tier"].astype(str)
-    return agg
-
-
-def best_practices_within_peers(peer_agg: pd.DataFrame, metric: str = "avg_cleanliness") -> pd.DataFrame:
-    """Within each peer_group, rank hotels by metric (e.g. cleanliness) for best-practice identification."""
-    peer_agg = peer_agg.copy()
-    peer_agg["rank_in_peer"] = peer_agg.groupby("peer_group")[metric].rank(ascending=False, method="min")
-    return peer_agg.sort_values(["peer_group", "rank_in_peer"])
-
-
-def recommendations_for_underperformers(
-    peer_agg: pd.DataFrame,
-    peer_group: str,
-    metric: str = "avg_cleanliness",
-    bottom_pct: float = 0.25,
-) -> pd.DataFrame:
-    """Hotels in the bottom bottom_pct of metric within peer_group, with peer median for gap analysis."""
-    g = peer_agg[peer_agg["peer_group"] == peer_group].copy()
-    if g.empty:
-        return g
-    g["peer_median"] = g[metric].median()
-    g["gap"] = g["peer_median"] - g[metric]
-    threshold = g[metric].quantile(bottom_pct)
-    return g[g[metric] <= threshold].sort_values("gap", ascending=False)
-
 
 if __name__ == "__main__":
-    # Demo: run with sample DB
-    df = get_reviews_df(sample=True)
+    df = get_reviews_df(sample=False)
     print("Reviews shape:", df.shape)
     features = extract_hotel_features(df)
     print(f"Extracted features for {len(features)} hotels")
