@@ -159,21 +159,6 @@ streamlit run app/streamlit_app.py
 
 Sample DB (5,000 reviews) is included in repository.
 
-### Reproducibility
-
-All notebooks run top-to-bottom without errors:
-- **Notebook 01:** 2 min
-- **Notebook 02:** 3 min
-- **Notebook 03:** 5-10 min (full DB), 2 min (sample DB)
-- **Notebook 04:** 1 min
-
-### Key Files to Review
-
-1. **`notebooks/03_competitive_benchmarking.ipynb`** - Main innovation
-2. **`src/benchmarking.py`** - ML clustering implementation
-3. **`profiling/`** - Performance analysis outputs
-4. **`app/streamlit_app.py`** - Dashboard implementation
-
 ---
 
 ## 🔬 Methodology
@@ -215,42 +200,10 @@ All notebooks run top-to-bottom without errors:
 
 ---
 
-## 📝 Documentation
-
-- **Technical Report:** `reports/assignment1_report.pdf` (8-10 pages)
-- **Code Documentation:** Docstrings in all modules
-- **Profiling Results:** `profiling/` directory
-- **Schema:** `data/data_schema.sql`
-
----
-
 ## 👥 Team Contributions
 
 [Add your team member contributions here]
 
 ---
-
-## 🔗 Assignment Compliance
-
-- [x] **Data Foundation:** 79,853 reviews (2008-2012) ✓
-- [x] **Sample Database:** 5,000 reviews ✓
-- [x] **Exploratory Analysis:** Correlations + statistical tests ✓
-- [x] **Competitive Benchmarking:** K-means clustering + validation ✓
-- [x] **Performance Profiling:** Query + code profiling ✓
-- [x] **Dashboard:** 3 core features ✓
-- [x] **Documentation:** README, notebooks, code comments ✓
-- [ ] **Technical Report:** 8-10 pages (in progress)
-
----
-
-## 📄 License
-
-Academic project for IS5126 course. Not for commercial use.
-
----
-
-## ❓ Questions?
-
-Refer to notebooks for detailed methodology. All analysis steps documented with business context.
 
 **Key Differentiator:** We extract hotel characteristics from text to identify TRUE competitors, not just group by ratings.
