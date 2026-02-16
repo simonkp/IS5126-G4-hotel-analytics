@@ -202,7 +202,18 @@ Sample DB (5,000 reviews) is included in repository.
 
 ## 👥 Team Contributions
 
-[Add your team member contributions here]
+All team members contributed equally to the project's success through collaborative effort and division of responsibilities.
+
+### Joint Contributions
+
+- **Manjunath Warad & Yadagiri Spurthi**  
+  Worked together on data preprocessing, ETL pipeline implementation, database schema design, indexing, and data quality validation.
+
+- **Rayaan Nabi Ahmed Quraishi & Aryan Jain**  
+  Collaborated on feature engineering, text-based characteristic extraction, K-means clustering implementation, model validation (silhouette and variance reduction), and development of the recommendation logic.
+
+- **Simon Kalayil Philip & the Team**  
+  Led exploratory data analysis, statistical testing, correlation analysis, visualization design, and contributed to dashboard feature development and business insight interpretation.
 
 ---
 
