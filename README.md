@@ -114,6 +114,7 @@ IS5126-G4-hotel-analytics/
 - ✅ **2008-2012** (exactly 5 years)
 - ✅ **>99% completeness** for all rating fields
 - ✅ **3,374 hotels** (avg 24 reviews/hotel)
+- ✅ **Referential integrity confirmed** (0 orphaned author records)
 
 ### Exploratory Analysis
 - **Top satisfaction driver:** Rooms (r=0.80, p<0.001, highly significant)
@@ -168,6 +169,10 @@ Sample DB (5,000 reviews) is included in repository.
 - **Schema:** Normalized (2 tables: authors, reviews)
 - **Indexes:** 3 strategic indexes (offering_id, author_id, rating_overall)
 - **Filtering:** Latest 5 years with deterministic sampling (seed=42)
+- **Data Validation:** Great Expectations (GX) with 6-dimension quality framework
+  - Completeness, Uniqueness, Validity, Consistency, Timeliness, Accuracy
+  - NIH missing data thresholds applied to all rating fields
+  - Pipeline gate: analysis only proceeds if all GX checks pass
 
 ### Exploratory Analysis
 - Pearson correlation with significance testing (scipy.stats)
