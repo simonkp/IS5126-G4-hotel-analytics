@@ -3,11 +3,11 @@
 **Course:** IS5126 Hands-on with Applied Analytics  
 **Academic Year:** 2025/2026 Sem 2  
 **Assignment:** Data Foundation & Exploratory Analytics (Assignment 1)  
-**Weight:** 15% of final course grade  
+
 
 **Report Header**  
-- **GitHub repository URL:** [Insert your repository URL here]  
-- **Student name(s) and ID(s):** [Insert names and IDs, e.g. A0123456 Name1, A0123457 Name2, ...]
+- **GitHub repository URL:**   https://github.com/simonkp/IS5126-G4-hotel-analytics
+- **Student name(s) and ID(s):** Manjunath Warad (ID: 12345678), Yadagiri Spurthi (ID: 23456789), Rayaan Nabi Ahmed Quraishi (ID: 34567890), Aryan Jain (ID: 45678901), Simon Kalayil Philip (ID: 56789012)
 
 ---
 
@@ -15,11 +15,7 @@
 
 | Member | Contribution Area |
 |--------|--------------------|
-| Manjunath Warad & Yadagiri Spurthi | Data preprocessing, ETL pipeline, database schema design, indexing, data quality validation (Great Expectations) |
-| Rayaan Nabi Ahmed Quraishi & Aryan Jain | Feature engineering, text-based characteristic extraction, K-means clustering, model validation (silhouette, variance reduction), recommendation logic |
-| Simon Kalayil Philip & Team | Exploratory data analysis, statistical testing, correlation analysis, visualization design, dashboard features, business insight interpretation |
 
-*All team members contributed collaboratively; responsibilities overlapped where appropriate.*
 
 ---
 
@@ -223,4 +219,3 @@ We would wire the dashboard to the full benchmarking pipeline (precompute cluste
 
 ---
 
-*End of Report. Profiling outputs: `profiling/query_results.txt`, `profiling/code_profiling.txt`. Notebooks: 01 (data preparation + GX), 02 (exploratory analysis), 03 (competitive benchmarking), 04 (performance profiling).*
