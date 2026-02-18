@@ -7,6 +7,5 @@ __pycache__/
 .DS_Store
 # Large data files (keep data/reviews_sample.db and data/data_schema.sql for TAs)
 data/review.json
-data/reviews.db
-data/reviews_full.db
-reports/~$Report.docx
+data/*.db
+!data/reviews_sample.db
