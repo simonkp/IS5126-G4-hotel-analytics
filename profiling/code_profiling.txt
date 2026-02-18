@@ -1,38 +1,38 @@
-         3844062 function calls (3767761 primitive calls) in 28.290 seconds
+         3856159 function calls (3779609 primitive calls) in 25.891 seconds
 
    Ordered by: cumulative time
-   List reduced from 1884 to 30 due to restriction <30>
+   List reduced from 2108 to 30 due to restriction <30>
 
    ncalls  tottime  percall  cumtime  percall filename:lineno(function)
-        1    0.110    0.110   21.175   21.175 benchmarking.py:26(extract_hotel_features)
-     3374    0.329    0.000   17.791    0.005 benchmarking.py:98(extract_text_features_for_hotel)
-    30381    0.092    0.000   13.828    0.000 {built-in method builtins.sum}
-        1    0.000    0.000    5.887    5.887 1604504971.py:1(<module>)
-        1    0.002    0.002    5.887    5.887 benchmarking.py:169(create_comparable_groups)
-       10    0.000    0.000    3.842    0.384 _kmeans.py:1047(fit_predict)
-       11    0.000    0.000    3.226    0.293 base.py:1319(wrapper)
-       10    0.005    0.000    3.070    0.307 _kmeans.py:1432(fit)
-    10248    0.106    0.000    2.503    0.000 frame.py:4073(__getitem__)
-     7642    2.242    0.000    2.242    0.000 benchmarking.py:143(<genexpr>)
-    18963    2.201    0.000    2.201    0.000 benchmarking.py:145(<genexpr>)
-     5499    2.049    0.000    2.049    0.000 benchmarking.py:142(<genexpr>)
-    16884    2.037    0.000    2.037    0.000 benchmarking.py:146(<genexpr>)
-    15955    2.034    0.000    2.034    0.000 benchmarking.py:144(<genexpr>)
-    13912    2.029    0.000    2.029    0.000 benchmarking.py:141(<genexpr>)
-    60/10    0.001    0.000    1.944    0.194 _param_validation.py:187(wrapper)
-       10    0.000    0.000    1.940    0.194 _unsupervised.py:49(silhouette_score)
-       10    0.002    0.000    1.939    0.194 _unsupervised.py:203(silhouette_samples)
-        1    0.000    0.000    1.930    1.930 parallel.py:631(cpu_count)
-        1    0.000    0.000    1.930    1.930 context.py:78(cpu_count)
-        1    0.000    0.000    1.930    1.930 context.py:227(_count_physical_cores)
-        1    0.000    0.000    1.930    1.930 context.py:286(_count_physical_cores_win32)
-        1    0.000    0.000    1.929    1.929 subprocess.py:512(run)
-       20    0.052    0.003    1.927    0.096 pairwise.py:2094(pairwise_distances_chunked)
-        1    0.000    0.000    1.907    1.907 subprocess.py:1178(communicate)
-        1    0.000    0.000    1.890    1.890 subprocess.py:1619(_communicate)
-        2    0.000    0.000    1.889    0.945 threading.py:1058(join)
-        2    0.002    0.001    1.889    0.945 {method 'join' of '_thread._ThreadHandle' objects}
-      2/1    0.000    0.000    1.888    1.888 threading.py:1000(_bootstrap)
-      2/1    0.001    0.000    1.888    1.888 threading.py:1027(_bootstrap_inner)
+     30/1    0.003    0.000   25.913   25.913 {built-in method builtins.exec}
+        1    0.003    0.003   25.890   25.890 517630660.py:2(_run_benchmark_workflow)
+     3374    0.249    0.000   15.560    0.005 benchmarking.py:98(extract_text_features_for_hotel)
+        1    0.067    0.067   12.546   12.546 benchmarking.py:26(extract_hotel_features)
+    30381    0.088    0.000   12.251    0.000 {built-in method builtins.sum}
+       39    0.019    0.000    7.081    0.182 base_events.py:1910(_run_once)
+        1    0.001    0.001    5.789    5.789 benchmarking.py:169(create_comparable_groups)
+       11    0.000    0.000    3.192    0.290 base.py:1319(wrapper)
+       10    0.000    0.000    3.189    0.319 _kmeans.py:1047(fit_predict)
+       10    0.004    0.000    3.182    0.318 _kmeans.py:1432(fit)
+    60/10    0.001    0.000    2.515    0.251 _param_validation.py:187(wrapper)
+       10    0.000    0.000    2.512    0.251 _unsupervised.py:49(silhouette_score)
+       10    0.002    0.000    2.511    0.251 _unsupervised.py:203(silhouette_samples)
+       20    0.056    0.003    2.499    0.125 pairwise.py:2094(pairwise_distances_chunked)
+    10248    0.088    0.000    2.187    0.000 frame.py:4073(__getitem__)
+       10    0.000    0.000    2.103    0.210 pairwise.py:2278(pairwise_distances)
+     7642    1.989    0.000    1.989    0.000 benchmarking.py:143(<genexpr>)
+    18963    1.953    0.000    1.953    0.000 benchmarking.py:145(<genexpr>)
+    15955    1.933    0.000    1.933    0.000 benchmarking.py:144(<genexpr>)
+    13912    1.914    0.000    1.914    0.000 benchmarking.py:141(<genexpr>)
+    16884    1.851    0.000    1.851    0.000 benchmarking.py:146(<genexpr>)
+        1    0.000    0.000    1.816    1.816 parallel.py:631(cpu_count)
+        1    0.000    0.000    1.816    1.816 context.py:78(cpu_count)
+        1    0.000    0.000    1.816    1.816 context.py:227(_count_physical_cores)
+        1    0.000    0.000    1.816    1.816 context.py:286(_count_physical_cores_win32)
+        1    0.000    0.000    1.816    1.816 subprocess.py:506(run)
+     5499    1.806    0.000    1.806    0.000 benchmarking.py:142(<genexpr>)
+        1    0.000    0.000    1.802    1.802 subprocess.py:1165(communicate)
+        1    0.000    0.000    1.786    1.786 subprocess.py:1603(_communicate)
+    31/30    0.000    0.000    1.786    0.060 threading.py:1153(_wait_for_tstate_lock)
 
 

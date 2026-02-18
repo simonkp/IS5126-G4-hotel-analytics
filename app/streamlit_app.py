@@ -10,6 +10,7 @@ import pandas as pd
 import streamlit as st
 import plotly.graph_objects as go
 import plotly.express as px
+from sqlalchemy import text
 from src.utils import get_engine, get_db_path
 
 st.set_page_config(page_title="Hotel Analytics", layout="wide")
@@ -157,18 +158,22 @@ elif page == "Competitive Analysis":
     
     if selected:
         # Hotel stats
-        hotel_stats = pd.read_sql(f"""
-            SELECT 
-                COUNT(*) as reviews,
-                AVG(rating_overall) as overall,
-                AVG(rating_service) as service,
-                AVG(rating_cleanliness) as cleanliness,
-                AVG(rating_value) as value,
-                AVG(rating_rooms) as rooms,
-                AVG(rating_location) as location
-            FROM reviews
-            WHERE offering_id = {selected}
-        """, engine).iloc[0]
+        hotel_stats = pd.read_sql(
+            text("""
+                SELECT 
+                    COUNT(*) as reviews,
+                    AVG(rating_overall) as overall,
+                    AVG(rating_service) as service,
+                    AVG(rating_cleanliness) as cleanliness,
+                    AVG(rating_value) as value,
+                    AVG(rating_rooms) as rooms,
+                    AVG(rating_location) as location
+                FROM reviews
+                WHERE offering_id = :id
+            """),
+            engine,
+            params={"id": selected},
+        ).iloc[0]
         
         # Metrics
         col1, col2, col3 = st.columns(3)

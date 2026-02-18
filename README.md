@@ -143,10 +143,11 @@ IS5126-G4-hotel-analytics/
 - **High-ROI:** 45% of recommendations >500% ROI
 - **Typical payback:** <3 weeks
 
-### Performance
-- **Query speed:** All operations <30ms
-- **Scalability:** Linear scaling to 80K+ reviews
-- **Optimization:** Proper index usage confirmed
+### Performance (Quantified Improvements)
+- **Query profiling:** Baseline (no indexes) vs with indexes; improvement % per query
+- **Key results:** Avg rating by hotel **96.9%** faster, Filter by offering_id **99.8%** faster, Complex aggregation **96.2%** faster (covering index)
+- **Indexes:** 4 (offering_id, author_id, rating_overall, covering index for aggregations)
+- **Code profiling:** cProfile on benchmarking workflow; outputs in `profiling/`
 
 ---
 
@@ -167,7 +168,7 @@ Sample DB (5,000 reviews) is included in repository.
 ### Data Foundation
 - **ETL:** Streaming JSONL parser with temporal filtering
 - **Schema:** Normalized (2 tables: authors, reviews)
-- **Indexes:** 3 strategic indexes (offering_id, author_id, rating_overall)
+- **Indexes:** 4 (offering_id, author_id, rating_overall, covering index for GROUP BY aggregations)
 - **Filtering:** Latest 5 years with deterministic sampling (seed=42)
 - **Data Validation:** Great Expectations (GX) with 6-dimension quality framework
   - Completeness, Uniqueness, Validity, Consistency, Timeliness, Accuracy
@@ -199,9 +200,9 @@ Sample DB (5,000 reviews) is included in repository.
 - Calculate ROI using industry benchmarks
 
 ### Performance Profiling
-- Query: EXPLAIN QUERY PLAN + timing (5-run averages)
-- Code: cProfile on benchmarking module
-- Documentation: Outputs in `profiling/` directory
+- **Query:** Baseline (no indexes) vs with indexes; 5-run averages; quantified improvement % per query; EXPLAIN QUERY PLAN (with indexes)
+- **Code:** cProfile on benchmarking workflow (runctx); top functions by cumulative time
+- **Outputs:** `profiling/query_results.txt`, `profiling/code_profiling.txt`
 
 ---
 
