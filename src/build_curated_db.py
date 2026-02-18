@@ -5,6 +5,11 @@ Build a year-stratified, hotel-diversified curated SQLite DB from a full reviews
 - Input:  data/reviews_full.db  (tables: reviews, authors)
 - Output: data/reviews.db       (tables: reviews(with date_iso), authors)
 
+Before running the script, ensure you have the full reviews DB at data/reviews_full.db. 
+Run this command to create full db if it doesn't exist:
+# python3 -m src.data_processing --full-etl
+# mv data/reviews.db data/reviews_full.db
+
 Run this script from the project root:
     python3 src/build_curated_db.py
 """
