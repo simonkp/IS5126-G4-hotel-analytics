@@ -1,24 +1,16 @@
-QUERY PERFORMANCE: BASELINE (no indexes) vs WITH INDEXES
-================================================================================
+--- Count reviews ---
+SQL: SELECT COUNT(*) FROM reviews
+(4, 0, 0, 'SCAN TABLE reviews USING COVERING INDEX idx_reviews_rating_overall')
 
-Baseline (no indexes):
-  Count all reviews: avg=0.40ms, min=0.00ms, max=1.00ms
-  Avg rating by hotel: avg=341.37ms, min=282.56ms, max=410.10ms
-  Filter by rating >= 4: avg=13.31ms, min=10.00ms, max=18.00ms
-  Filter by offering_id: avg=210.45ms, min=186.04ms, max=239.05ms
-  Complex aggregation: avg=294.57ms, min=237.04ms, max=439.62ms
+--- Avg rating by hotel ---
+SQL: SELECT offering_id, AVG(rating_overall) FROM reviews GROUP BY offering_id
+(7, 0, 0, 'SCAN TABLE reviews USING INDEX idx_reviews_offering')
 
-With indexes:
-  Count all reviews: avg=0.40ms, min=0.00ms, max=2.00ms
-  Avg rating by hotel: avg=10.71ms, min=8.00ms, max=13.52ms
-  Filter by rating >= 4: avg=15.51ms, min=12.52ms, max=22.00ms
-  Filter by offering_id: avg=0.40ms, min=0.00ms, max=1.00ms
-  Complex aggregation: avg=11.20ms, min=9.00ms, max=13.00ms
+--- Top 10 hotels ---
+SQL: SELECT offering_id, COUNT(*) AS n FROM reviews GROUP BY offering_id ORDER BY n DESC LIMIT 10
+(8, 0, 0, 'SCAN TABLE reviews USING COVERING INDEX idx_reviews_offering')
+(42, 0, 0, 'USE TEMP B-TREE FOR ORDER BY')
 
-QUANTIFIED IMPROVEMENT:
-                Query  Baseline (ms)  With indexes (ms)  Improvement (%)
-    Count all reviews           0.40               0.40             -0.1
-  Avg rating by hotel         341.37              10.71             96.9
-Filter by rating >= 4          13.31              15.51            -16.5
-Filter by offering_id         210.45               0.40             99.8
-  Complex aggregation         294.57              11.20             96.2
+--- Reviews with rating >= 4 ---
+SQL: SELECT * FROM reviews WHERE rating_overall >= 4 LIMIT 1000
+(4, 0, 0, 'SEARCH TABLE reviews USING INDEX idx_reviews_rating_overall (rating_overall>?)')
