@@ -206,15 +206,5 @@ The dashboard is functional with 3–5 core features (overview metrics and chart
 - **Competitive benchmarking** (Notebook 03, `src/benchmarking.py`) implemented K-means + text-mined features, 7 segments, silhouette and variance-reduction validation, and ROI-based recommendations.
 - **Dashboard** (Streamlit) offers overview, competitive analysis (industry comparison, gap analysis), and performance trends.
 
-### Limitations
-
-- Dashboard currently compares selected hotel to **industry average** only; segment-level “peer median” and “recommendations with ROI” are computed in notebooks/benchmarking but not yet fully wired into the app (precompute/cache would be needed for good UX).
-- Clustering and recommendations are in Python; for very large scale, moving aggregations into the DB or precomputing segment memberships could be considered.
-- Text feature extraction is regex-based; NLP could improve extraction at the cost of complexity and dependencies.
-
-### Future Enhancements (2–3 sentences)
-
-We would wire the dashboard to the full benchmarking pipeline (precompute clusters and recommendations at load, then show “Your segment”, “Peer median”, and “Recommendations with ROI” for the selected hotel) so the same story as in the report is visible in the app. We would also consider vectorising or caching text feature extraction to speed up the benchmarking workflow, and optionally add aspect-level trend charts (e.g. service/cleanliness over years) on the Performance Trends page.
-
 ---
 
