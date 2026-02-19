@@ -1,38 +1,38 @@
-         18229 function calls (17956 primitive calls) in 0.046 seconds
+         3856159 function calls (3779609 primitive calls) in 25.891 seconds
 
    Ordered by: cumulative time
-   List reduced from 1139 to 30 due to restriction <30>
+   List reduced from 2108 to 30 due to restriction <30>
 
    ncalls  tottime  percall  cumtime  percall filename:lineno(function)
-        3    0.000    0.000    0.046    0.015 interactiveshell.py:3543(run_code)
-      4/3    0.000    0.000    0.046    0.015 {built-in method builtins.exec}
-        1    0.000    0.000    0.031    0.031 benchmarking.py:13(get_reviews_df)
-        1    0.000    0.000    0.031    0.031 sql.py:572(read_sql)
-        1    0.000    0.000    0.029    0.029 sql.py:1791(read_query)
-        3    0.000    0.000    0.019    0.006 result.py:1331(fetchall)
-        3    0.000    0.000    0.019    0.006 result.py:555(_allrows)
-        3    0.000    0.000    0.017    0.006 cursor.py:2251(_fetchall_impl)
-        3    0.000    0.000    0.017    0.006 cursor.py:1191(fetchall)
-        3    0.017    0.006    0.017    0.006 {method 'fetchall' of 'sqlite3.Cursor' objects}
-        1    0.000    0.000    0.015    0.015 3799795350.py:1(<module>)
-        1    0.000    0.000    0.015    0.015 benchmarking.py:23(comparable_groups_by_volume_and_rating)
-        1    0.000    0.000    0.010    0.010 sql.py:196(_wrap_result)
-        1    0.002    0.002    0.010    0.010 sql.py:162(_convert_arrays_to_dataframe)
-        1    0.000    0.000    0.009    0.009 generic.py:1420(aggregate)
-        1    0.000    0.000    0.006    0.006 construction.py:1006(convert_object_array)
-        1    0.000    0.000    0.006    0.006 construction.py:1071(<listcomp>)
-       12    0.005    0.000    0.006    0.000 construction.py:1028(convert)
-        1    0.000    0.000    0.006    0.006 apply.py:172(agg)
-        1    0.000    0.000    0.006    0.006 apply.py:415(agg_dict_like)
-        1    0.000    0.000    0.006    0.006 apply.py:1570(agg_or_apply_dict_like)
-        1    0.000    0.000    0.004    0.004 apply.py:425(compute_dict_like)
-    29/27    0.000    0.000    0.004    0.000 base.py:475(__new__)
-        1    0.000    0.000    0.004    0.004 apply.py:496(<listcomp>)
-     10/5    0.000    0.000    0.003    0.001 generic.py:232(aggregate)
-        5    0.000    0.000    0.003    0.001 generic.py:331(_aggregate_multiple_funcs)
-        6    0.000    0.000    0.003    0.000 frame.py:698(__init__)
-        6    0.000    0.000    0.003    0.000 construction.py:423(dict_to_mgr)
-        1    0.000    0.000    0.003    0.003 apply.py:1638(reconstruct_func)
-        1    0.000    0.000    0.003    0.003 apply.py:1733(normalize_keyword_aggregation)
+     30/1    0.003    0.000   25.913   25.913 {built-in method builtins.exec}
+        1    0.003    0.003   25.890   25.890 517630660.py:2(_run_benchmark_workflow)
+     3374    0.249    0.000   15.560    0.005 benchmarking.py:98(extract_text_features_for_hotel)
+        1    0.067    0.067   12.546   12.546 benchmarking.py:26(extract_hotel_features)
+    30381    0.088    0.000   12.251    0.000 {built-in method builtins.sum}
+       39    0.019    0.000    7.081    0.182 base_events.py:1910(_run_once)
+        1    0.001    0.001    5.789    5.789 benchmarking.py:169(create_comparable_groups)
+       11    0.000    0.000    3.192    0.290 base.py:1319(wrapper)
+       10    0.000    0.000    3.189    0.319 _kmeans.py:1047(fit_predict)
+       10    0.004    0.000    3.182    0.318 _kmeans.py:1432(fit)
+    60/10    0.001    0.000    2.515    0.251 _param_validation.py:187(wrapper)
+       10    0.000    0.000    2.512    0.251 _unsupervised.py:49(silhouette_score)
+       10    0.002    0.000    2.511    0.251 _unsupervised.py:203(silhouette_samples)
+       20    0.056    0.003    2.499    0.125 pairwise.py:2094(pairwise_distances_chunked)
+    10248    0.088    0.000    2.187    0.000 frame.py:4073(__getitem__)
+       10    0.000    0.000    2.103    0.210 pairwise.py:2278(pairwise_distances)
+     7642    1.989    0.000    1.989    0.000 benchmarking.py:143(<genexpr>)
+    18963    1.953    0.000    1.953    0.000 benchmarking.py:145(<genexpr>)
+    15955    1.933    0.000    1.933    0.000 benchmarking.py:144(<genexpr>)
+    13912    1.914    0.000    1.914    0.000 benchmarking.py:141(<genexpr>)
+    16884    1.851    0.000    1.851    0.000 benchmarking.py:146(<genexpr>)
+        1    0.000    0.000    1.816    1.816 parallel.py:631(cpu_count)
+        1    0.000    0.000    1.816    1.816 context.py:78(cpu_count)
+        1    0.000    0.000    1.816    1.816 context.py:227(_count_physical_cores)
+        1    0.000    0.000    1.816    1.816 context.py:286(_count_physical_cores_win32)
+        1    0.000    0.000    1.816    1.816 subprocess.py:506(run)
+     5499    1.806    0.000    1.806    0.000 benchmarking.py:142(<genexpr>)
+        1    0.000    0.000    1.802    1.802 subprocess.py:1165(communicate)
+        1    0.000    0.000    1.786    1.786 subprocess.py:1603(_communicate)
+    31/30    0.000    0.000    1.786    0.060 threading.py:1153(_wait_for_tstate_lock)
 
 

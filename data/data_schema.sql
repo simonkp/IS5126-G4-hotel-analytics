@@ -34,3 +34,4 @@ CREATE TABLE reviews (
 CREATE INDEX idx_reviews_offering ON reviews(offering_id);
 CREATE INDEX idx_reviews_author ON reviews(author_id);
 CREATE INDEX idx_reviews_rating_overall ON reviews(rating_overall);
+CREATE INDEX idx_reviews_offering_rating_clean ON reviews(offering_id, rating_overall, rating_cleanliness);
