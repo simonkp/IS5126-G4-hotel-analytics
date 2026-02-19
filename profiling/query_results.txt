@@ -14,3 +14,4 @@ SQL: SELECT offering_id, COUNT(*) AS n FROM reviews GROUP BY offering_id ORDER B
 --- Reviews with rating >= 4 ---
 SQL: SELECT * FROM reviews WHERE rating_overall >= 4 LIMIT 1000
 (4, 0, 0, 'SEARCH TABLE reviews USING INDEX idx_reviews_rating_overall (rating_overall>?)')
+
