@@ -4,18 +4,17 @@
 **Academic Year:** 2025/2026 Sem 2  
 **Assignment:** Data Foundation & Exploratory Analytics (Assignment 1)  
 
-
-**Report Header**  
+**Report Header**
 - **GitHub repository URL:**   https://github.com/simonkp/IS5126-G4-hotel-analytics
-- **Student name(s) and ID(s):** Manjunath Warad (ID: 12345678), Yadagiri Spurthi (ID: 23456789), Rayaan Nabi Ahmed Quraishi (ID: 34567890), Aryan Jain (ID: 45678901), Simon Kalayil Philip (ID: 56789012)
+- Student name(s) Contribution Summary
 
----
-
-## Member Contribution Summary (Group Submissions)
-
-| Member | Contribution Area |
-|--------|--------------------|
-
+  | Member                     | ID        | Contribution Area |
+  |----------------------------|-----------|-------------------|
+  | Aryan Jain                 |           |                   |
+  | Manjunath Warad            |           |                   |
+  | Rayaan Nabi Ahmed Quraishi |           |                   |
+  | Simon Kalayil Philip       | A0332904J |                   |
+  | Yadagiri Spurthi           |           |                   |
 
 ---
 
