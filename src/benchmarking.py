@@ -23,7 +23,7 @@ def get_reviews_df(sample: bool = False) -> pd.DataFrame:
         engine,
     )
 
-def extract_hotel_features(df: pd.DataFrame) -> pd.DataFrame:
+def extract_hotel_features(df: pd.DataFrame, verbose: bool = True) -> pd.DataFrame:
     """
     Extract comprehensive hotel features for clustering.
     
@@ -33,7 +33,8 @@ def extract_hotel_features(df: pd.DataFrame) -> pd.DataFrame:
     3. Text-derived features (amenities, location type, price tier)
     4. Reviewer engagement (helpful votes)
     """
-    print("Extracting hotel-level features...")
+    if verbose:
+        print("Extracting hotel-level features...")
     
     # Aggregate rating features
     agg = df.groupby("offering_id").agg(
@@ -50,7 +51,8 @@ def extract_hotel_features(df: pd.DataFrame) -> pd.DataFrame:
     ).reset_index()
     
     # Extract text features
-    print("Analyzing review text for hotel characteristics...")
+    if verbose:
+        print("Analyzing review text for hotel characteristics...")
     text_features_list = []
     
     for hotel_id in df['offering_id'].unique():
@@ -69,7 +71,7 @@ def extract_hotel_features(df: pd.DataFrame) -> pd.DataFrame:
     
     return features
 
-def filter_low_signal_hotels(features: pd.DataFrame, min_reviews: int = 3) -> pd.DataFrame:
+def filter_low_signal_hotels(features: pd.DataFrame, min_reviews: int = 3, verbose: bool = True) -> pd.DataFrame:
     """
     Remove hotels with insufficient data for clustering.
     
@@ -89,8 +91,9 @@ def filter_low_signal_hotels(features: pd.DataFrame, min_reviews: int = 3) -> pd
     # Keep hotels with at least SOME signal
     features_filtered = features_filtered[features_filtered['signal_strength'] > 0].copy()
     
-    print(f"Filtered: {len(features)} → {len(features_filtered)} hotels")
-    print(f"Removed {len(features) - len(features_filtered)} low-signal hotels")
+    if verbose:
+        print(f"Filtered: {len(features)} → {len(features_filtered)} hotels")
+        print(f"Removed {len(features) - len(features_filtered)} low-signal hotels")
     
     return features_filtered.drop(columns=['signal_strength'])
 
@@ -169,6 +172,7 @@ def extract_text_features_for_hotel(hotel_reviews: pd.DataFrame) -> Dict:
 def create_comparable_groups(
     features: pd.DataFrame,
     n_clusters: int = 6,
+    verbose: bool = True,
 ) -> Tuple[pd.DataFrame, float, Dict]:
     """
     Create comparable hotel groups using K-means clustering.
@@ -182,7 +186,8 @@ def create_comparable_groups(
     - Weight hotel characteristics (location, type, amenities) more heavily
     - This creates clusters based on HOTEL TYPE, not just quality
     """
-    print(f"Creating {n_clusters} comparable groups...")
+    if verbose:
+        print(f"Creating {n_clusters} comparable groups...")
     
     # Select features for clustering
     clustering_features = [
@@ -205,20 +210,23 @@ def create_comparable_groups(
     X = X.replace([np.inf, -np.inf], np.nan).fillna(0)
     
     # Check data validity
-    print(f"Data shape: {X.shape}")
-    print(f"Unique hotels: {len(features)}")
+    if verbose:
+        print(f"Data shape: {X.shape}")
+        print(f"Unique hotels: {len(features)}")
     
     # CRITICAL: Check if we have enough variance to cluster
     feature_variance = X.var()
     low_variance_features = feature_variance[feature_variance < 0.01].index.tolist()
     
     if len(low_variance_features) > 0:
-        print(f"Low variance features: {low_variance_features}")
+        if verbose:
+            print(f"Low variance features: {low_variance_features}")
         # Remove them
         X = X.drop(columns=low_variance_features)
     
     if X.shape[1] < 2:
-        print("Not enough features with variance for clustering!")
+        if verbose:
+            print("Not enough features with variance for clustering!")
         features['cluster'] = 0  # Single cluster
         return features, 0.0, {0: {'n_hotels': len(features), 'avg_rating': features['avg_rating'].mean()}}
     
@@ -227,17 +235,20 @@ def create_comparable_groups(
     try:
         X_scaled = scaler.fit_transform(X)
     except Exception as e:
-        print(f"Standardization failed: {e}")
+        if verbose:
+            print(f"Standardization failed: {e}")
         features['cluster'] = pd.qcut(features['avg_rating'], q=4, labels=False, duplicates='drop')
         return features, 0.3, {}
     
     # Check for NaN/Inf after scaling
     if np.any(np.isnan(X_scaled)) or np.any(np.isinf(X_scaled)):
-        print("NaN/Inf detected after scaling, cleaning...")
+        if verbose:
+            print("NaN/Inf detected after scaling, cleaning...")
         X_scaled = np.nan_to_num(X_scaled, nan=0.0, posinf=0.0, neginf=0.0)
     
     # Test different K values
-    print("\nTesting different cluster counts:")
+    if verbose:
+        print("\nTesting different cluster counts:")
     results = []
     
     # Determine realistic range based on data size
@@ -276,15 +287,18 @@ def create_comparable_groups(
                 'max_cluster_size': cluster_sizes.max()
             })
             
-            print(f"  K={k}: silhouette={score:.3f}, min_size={min_size}, max_size={cluster_sizes.max()}")
+            if verbose:
+                print(f"  K={k}: silhouette={score:.3f}, min_size={min_size}, max_size={cluster_sizes.max()}")
             
         except Exception as e:
-            print(f"  K={k}: FAILED - {str(e)[:50]}")
+            if verbose:
+                print(f"  K={k}: FAILED - {str(e)[:50]}")
             continue
     
     # Select best result
     if len(results) == 0:
-        print(f"\n All clustering attempts failed. Using rating-based fallback.")
+        if verbose:
+            print(f"\n All clustering attempts failed. Using rating-based fallback.")
         features['cluster'] = pd.qcut(features['avg_rating'], q=4, labels=False, duplicates='drop')
         sil_score = 0.3
         best_n = features['cluster'].nunique()
@@ -297,7 +311,8 @@ def create_comparable_groups(
         sil_score = best['score']
         best_n = best['k']
         
-        print(f"\n Selected K={best_n} with silhouette={sil_score:.3f}")
+        if verbose:
+            print(f"\n Selected K={best_n} with silhouette={sil_score:.3f}")
     
     # Create cluster profiles
     cluster_profiles = {}
