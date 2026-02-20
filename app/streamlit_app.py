@@ -28,7 +28,7 @@ ACCENT_LITE = "#A29BFE"   # lighter purple
 GOOD        = "#00B894"   # green
 WARN        = "#FDCB6E"   # amber
 BAD         = "#D63031"   # red
-BG_CARD     = "#F8F9FD"   # light card background
+BG_CARD     = "#1E1E2E"   # dark card background
 PALETTE     = px.colors.qualitative.Set2
 
 # ── page config ─────────────────────────────────────────────────────────────
@@ -43,15 +43,30 @@ st.set_page_config(
 st.markdown("""
 <style>
     [data-testid="stMetric"] {
-        background: linear-gradient(135deg, #f8f9fd 0%, #eef1fb 100%);
-        border: 1px solid #e4e8f1;
+        background: linear-gradient(135deg, #2d2b55 0%, #1e1e2e 100%);
+        border: 1px solid #3d3b65;
         border-radius: 12px;
         padding: 16px 20px;
-        box-shadow: 0 2px 8px rgba(108,92,231,.08);
+        box-shadow: 0 2px 8px rgba(108,92,231,.25);
     }
-    [data-testid="stMetric"] label { font-weight: 600; }
+    [data-testid="stMetric"] label {
+        font-weight: 600;
+        color: #ccc !important;
+    }
+    [data-testid="stMetric"] [data-testid="stMetricValue"] {
+        color: #ffffff !important;
+        font-weight: 700;
+    }
+    [data-testid="stMetric"] [data-testid="stMetricDelta"] {
+        color: #a29bfe !important;
+    }
     .block-container { padding-top: 1.5rem; }
-    section[data-testid="stSidebar"] { background: #f4f3ff; }
+    section[data-testid="stSidebar"] {
+        background: rgba(45, 43, 85, 0.3);
+    }
+    section[data-testid="stSidebar"] .stRadio label {
+        color: inherit !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
