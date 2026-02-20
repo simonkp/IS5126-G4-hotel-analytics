@@ -73,10 +73,12 @@ python -m src.data_processing
 streamlit run app/streamlit_app.py
 ```
 
-**Dashboard Features:**
-- 📊 Overview with satisfaction drivers
-- 🎯 Competitive benchmarking (radar charts, gap analysis)
-- 📈 Performance trends (year-over-year)
+**Dashboard Features (5 pages):**
+- 📊 Overview — KPIs, satisfaction drivers, correlation heatmap
+- 🏨 Hotel Explorer — per-hotel radar chart vs cluster peers
+- 🎯 Competitive Benchmarking — ML clusters, gap analysis, ROI recommendations
+- 📈 Performance Trends — year-over-year, aspect trends, top/bottom tables
+- 🔍 Review Insights — review length, helpfulness, reviewer geography
 
 ---
 
@@ -203,6 +205,44 @@ Sample DB (5,000 reviews) is included in repository.
 - **Query:** Baseline (no indexes) vs with indexes; 5-run averages; quantified improvement % per query; EXPLAIN QUERY PLAN (with indexes)
 - **Code:** cProfile on benchmarking workflow (runctx); top functions by cumulative time
 - **Outputs:** `profiling/query_results.txt`, `profiling/code_profiling.txt`
+
+---
+
+## 🏗️ System Architecture & Dashboard
+
+### Architecture Overview
+
+The platform follows a **three-layer architecture** — Data, Analytics, and Presentation — with clear separation of concerns.
+
+**Data Layer.** Raw review data (~1.1 GB JSONL) is ingested through a streaming ETL pipeline (`src/data_processing.py`) that performs temporal filtering (latest 5 years: 2008–2012) and deterministic sampling (seed=42). The output is a normalized SQLite database with two tables (`reviews`, `authors`) and four indexes, including a covering index for GROUP BY aggregation queries. A 5,000-review sample database ships with the repository for reproducibility.
+
+**Analytics Layer.** Three modules consume data from SQLite. The exploratory analysis (Notebook 02) computes Pearson correlations and statistical tests. The benchmarking engine (`src/benchmarking.py`) performs text-based feature extraction, K-Means clustering, and ROI-based recommendation generation. The performance profiler (Notebook 04) benchmarks query execution with and without indexes.
+
+**Presentation Layer.** A Streamlit dashboard (`app/streamlit_app.py`) serves as the user-facing interface, querying the database via SQLAlchemy and consuming clustering outputs from the benchmarking engine. All expensive computations are cached using `@st.cache_data` to ensure responsive interaction after first load.
+
+### Dashboard Features & Business Rationale
+
+| # | Feature | Business Question | Key Features | How It Helps |
+|---|---------|-------------------|--------------|--------------|
+| 1 | **📊 Overview** | *"What's our review landscape?"* | KPI cards, satisfaction driver rankings, aspect correlation heatmap | Identifies which aspects drive overall satisfaction (Rooms: r=0.80) |
+| 2 | **🏨 Hotel Explorer** | *"How is MY hotel doing?"* | Radar chart vs cluster peers, aspect breakdown, yearly trend | Shows gaps versus **similar** hotels, not all hotels |
+| 3 | **🎯 Benchmarking** | *"Who are my competitors? Where to invest?"* | ML cluster profiles, scatter plot, gap analysis with ROI estimates | Groups hotels by actual similarity; provides actionable recs with payback |
+| 4 | **📈 Trends** | *"Getting better or worse?"* | Dual-axis volume/rating chart, aspect trends, top/bottom tables | Reveals temporal patterns for proactive intervention |
+| 5 | **🔍 Insights** | *"What can reviews tell us?"* | Review length, helpfulness, mobile/desktop, reviewer geography | Informs marketing and review response strategy |
+
+### Technology Stack
+
+| Category | Tools |
+|---|---|
+| **Language** | Python 3.8+ |
+| **Database** | SQLite (79K reviews, 4 indexes) |
+| **ORM** | SQLAlchemy 2.0 |
+| **ML** | scikit-learn (K-Means, StandardScaler, silhouette_score) |
+| **Visualisation** | Plotly (interactive), matplotlib/seaborn (notebooks) |
+| **Dashboard** | Streamlit (5 pages, cached queries) |
+| **Data Quality** | Great Expectations (6-dimension validation) |
+| **Version Control** | Git / GitHub |
+
 
 ---
 
