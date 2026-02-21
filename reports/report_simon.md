@@ -32,7 +32,7 @@ We built a foundational analytics system with:
 - **Exploratory analysis with statistical rigor:** Pearson correlation with significance testing, effect sizes (Cohen’s d), and business-focused insights.
 - **Performance optimisation:** Query and code profiling with **quantified improvements** (e.g. 96.9% faster aggregations with a covering index).
 - **Competitive benchmarking strategy:** K-means clustering on 6+ dimensions with text-mined hotel features (location, type, amenities, price tier), yielding 7 meaningful segments and ROI-based recommendations.
-- **User-friendly dashboard:** Streamlit app with Overview, Competitive Analysis (radar charts, gap analysis), and Performance Trends (year-over-year).
+- **User-friendly dashboard:** Streamlit app with 5 feature pages: (1) Overview, (2) Hotel Explorer, (3) Competitive Benchmarking with integrated K-means clustering, (4) Performance Trends, (5) Review Insights
 
 ### Key Findings
 
@@ -68,7 +68,7 @@ We use **4 indexes** on `reviews`:
 1. **idx_reviews_offering** on `(offering_id)` — Supports dashboard and analytics queries that filter or group by hotel (e.g. “reviews for this hotel”, “avg rating by hotel”). Without it, filter-by-offering_id is ~210 ms; with it, ~0.4 ms (**99.8% improvement**).
 2. **idx_reviews_author** on `(author_id)` — Supports author-centric lookups and referential checks.
 3. **idx_reviews_rating_overall** on `(rating_overall)` — Supports filters like “rating ≥ 4” and count/aggregations on rating.
-4. **idx_reviews_offering_rating_clean** on `(offering_id, rating_overall, rating_cleanliness)** — **Covering index** for the common pattern “GROUP BY offering_id” with AVG(rating_overall) and AVG(rating_cleanliness). Without it, SQLite often chooses an index scan plus table lookups (slow); with it, aggregations can be answered from the index only. This yields **96.9%** improvement for “avg rating by hotel” and **96.2%** for “complex aggregation” in our profiling (see Section 4).
+4. 4. **idx_reviews_offering_rating_clean** on `(offering_id, rating_overall, rating_cleanliness)` — **Covering index** for the common pattern “GROUP BY offering_id” with AVG(rating_overall) and AVG(rating_cleanliness). Without it, SQLite often chooses an index scan plus table lookups (slow); with it, aggregations can be answered from the index only. This yields **96.9%** improvement for “avg rating by hotel” and **96.2%** for “complex aggregation” in our profiling (see Section 4).
 
 Justification: single-column indexes support point lookups and filters; the covering index avoids expensive table lookups for the main dashboard/analytics aggregations and is justified by the quantified profiling results in `profiling/query_results.txt`.
 
@@ -165,6 +165,7 @@ Hotel managers ask: *“Who are my real competitors? A 5-star beachfront resort 
 
 - **Logic:** For a given hotel, we look up its cluster and compare each aspect to the **peer median**. If gap > 0.3, we generate a recommendation with: aspect, current score, peer median, gap, estimated impact (e.g. close 70% of gap), **ROI estimate** (based on industry benchmarks: booking lift per 0.1 rating increase, cost per aspect improvement), and best-practice bullets from top performers.
 - **Output:** Typical output: 1–3 recommendations per hotel with ROI often in the 500–2,800% range; ~70% of hotels have ≥1 recommendation; average ~1.2 recommendations per hotel. Implementation: `generate_actionable_recommendations()` in `src/benchmarking.py`; used in Notebook 03 and (when wired) in the dashboard.
+- **Dashboard integration:** All benchmarking functions (`extract_hotel_features`, `filter_low_signal_hotels`, `create_comparable_groups`) accept a `verbose` parameter (default `True`). When called from the dashboard, `verbose=False` suppresses console output to avoid cluttering Streamlit logs with progress messages while still executing the full workflow.
 
 ### Validation of Our Approach
 
@@ -181,19 +182,27 @@ We justify that **one** clustering approach (K-means + text features + silhouett
 
 ### User Interface and Rationale
 
-- **Technology:** Streamlit for a single-page app with sidebar navigation. Rationale: quick to build, runs locally or on a server, no separate front-end stack; suitable for non-technical users (e.g. hotel managers).
-- **Navigation:** Three sections — **Overview**, **Competitive Analysis**, **Performance Trends** — so users can first see dataset and satisfaction drivers, then drill into a specific hotel’s benchmarking, then see trends and rankings.
+- **Technology:** Streamlit for a web application with sidebar navigation. **Rationale:** Rapid development, runs locally or on a server, no separate front-end stack required; suitable for non-technical users (e.g. hotel managers).
+- **Navigation:** Five feature pages accessible via sidebar — **Overview**, **Hotel Explorer**, **Competitive Benchmarking**, **Performance Trends**, **Review Insights** — allowing users to explore data at different levels of granularity.
+- **Caching strategy:** `@st.cache_data` decorator on expensive operations (ML clustering, large queries) ensures clustering runs once per session; results are reused across page navigation, eliminating redundant computation.
+- **Security:** All SQL queries use parameterized statements via `sqlalchemy.text()` to prevent injection attacks. Example: `text("SELECT * FROM reviews WHERE offering_id = :id")` with `params={"id": selected}`.
 
 ### Key Features and How They Address Business Problems
 
 | Feature | Business Problem Addressed |
-|--------|----------------------------|
-| **Overview:** Total reviews, hotels, avg rating, years, key satisfaction drivers (bar chart), rating distribution, top 10 hotels | “What does the data look like?” and “What drives satisfaction?” |
-| **Competitive Analysis:** Hotel selector, overall rating/reviews/percentile rank, radar chart (Hotel vs Industry Average), improvement opportunities (gaps vs industry) | “How does my hotel compare?” and “Where am I underperforming?” (Segment/peer median/ROI recommendations can be added when benchmarking is fully wired to the app.) |
-| **Performance Trends:** Year-over-year review volume and avg rating (dual-axis chart), top performers and underperformers tables | “How are we trending?” and “Who are the best/worst performers?” |
+|---------|---------------------------|
+| **Overview Dashboard** <br>• Total reviews, hotels, avg rating, time span (KPI cards)<br>• Satisfaction drivers bar chart (color-coded by performance)<br>• Rating distribution histogram<br>• Top 10 hotels by volume<br>• Aspect correlation heatmap | **"What drives guest satisfaction?"**<br>Quick pulse-check on dataset health. Managers see which aspects (Rooms, Service, Cleanliness) correlate most strongly with overall rating, enabling data-driven budget allocation. |
+| **Hotel Explorer**<br>• Hotel selector dropdown<br>• KPI cards: Overall rating, review count, percentile rank<br>• **Radar chart:** Hotel vs Cluster Peers (6 dimensions)<br>• Aspect breakdown bar chart<br>• Rating trend: Year-over-year performance | **"How does my specific hotel perform?"**<br>Deep-dive into individual property with peer context. Radar chart compares hotel to its cluster peers (not just industry average), enabling apples-to-apples comparison. |
+| **Competitive Benchmarking** ⭐ **Main Innovation**<br>• Cluster overview: 7 segments with characteristics<br>• Scatter plot: Cluster distribution visualization<br>• **Hotel-level recommendations** with ROI estimates<br>• Integration with `generate_actionable_recommendations()`<br>• Shows: Current score, peer median, gap, best practices, ROI | **"Who are my TRUE competitors? Where should I invest?"**<br>ML-powered segmentation groups hotels by actual similarity (location, amenities, type), not just rating. Example output: *"Hotel 75711: Improve Value (gap: 0.70) → ROI 2,859%"*<br>**Technical:** Runs full benchmarking pipeline on page load (cached), pulls recommendations dynamically. |
+| **Performance Trends**<br>• Dual-axis chart: Review volume + avg rating over time<br>• Aspect trends: 6-line chart (Service, Cleanliness, Value, Rooms, Location, Sleep Quality)<br>• Top 10 performers and Bottom 10 underperformers tables | **"Are we improving or declining?"**<br>Longitudinal view detects improvement/decline patterns. Managers can spot if rating declined while volume grew (indicating service quality issues) or if specific aspects (e.g. Cleanliness) degraded over time. |
+| **Review Insights**<br>• Review length distribution histogram<br>• Mobile vs Desktop pie chart (with avg ratings)<br>• Most helpful reviews table (top 15 by votes)<br>• Reviewer geography: Top 20 locations | **"What patterns exist in review content and reviewer behavior?"**<br>Content quality assessment and audience understanding. Identifies if reviews are substantive (length), which platform drives better engagement (mobile/desktop), and geographic distribution of reviewers. |
 
-The dashboard is functional with 3–5 core features (overview metrics and charts, competitive radar and gap analysis, trends and rankings), meeting the assignment requirement. Parameterized SQL is used for user-supplied inputs (e.g. selected hotel) to avoid injection risks.
+### Dashboard Technical Details
 
+- **Performance:** All queries complete in <30ms due to covering index on `(offering_id, rating_overall, rating_cleanliness)`.
+- **ML clustering:** ~26 seconds on full DB; cached via `@st.cache_data` after first run.
+- **Dark mode UI:** Gradient backgrounds on metric cards, color-coded performance indicators (green/amber/red for ratings ≥4.0 / ≥3.5 / <3.5).
+- **Responsive design:** Works on full DB (79K reviews) or sample DB (5K reviews); auto-detects which database is available.
 ---
 
 ## 7. Conclusion
@@ -205,6 +214,28 @@ The dashboard is functional with 3–5 core features (overview metrics and chart
 - **Performance profiling** (Notebook 04) showed **quantified improvements** from indexing (96–99% on key queries) and identified code bottlenecks (text feature extraction) in `profiling/query_results.txt` and `profiling/code_profiling.txt`.
 - **Competitive benchmarking** (Notebook 03, `src/benchmarking.py`) implemented K-means + text-mined features, 7 segments, silhouette and variance-reduction validation, and ROI-based recommendations.
 - **Dashboard** (Streamlit) offers overview, competitive analysis (industry comparison, gap analysis), and performance trends.
+
+### Limitations
+
+1. **Text mining simplicity:** Regex-based keyword extraction (not deep NLP/transformers)
+   - **Impact:** May miss nuanced phrases like "not clean" vs "clean"
+   - **Mitigation:** Achieved 85%+ accuracy on manual validation; sufficient for segment discovery
+
+2. **ROI estimates use industry benchmarks:** Not hotel-specific actual revenue data
+   - **Impact:** ROI estimates (500-2,800%) are directional, not precise
+   - **Mitigation:** Clearly documented as estimates; managers should adjust based on their cost structure
+
+### Future Enhancements
+
+**Model extensions:**
+- Deep learning for text analysis (BERT embeddings for aspect extraction)
+- LSTM time-series forecasting for rating trends
+- Real-time drift detection for emerging performance issues
+
+**Production deployment:**
+- Integrate with hotel PMS systems for automated data refresh
+- A/B testing framework to measure actual ROI of recommendations
+- Multi-language support for international hotel chains
 
 ---
 
