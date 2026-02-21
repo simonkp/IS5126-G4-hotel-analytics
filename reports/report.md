@@ -8,13 +8,13 @@
 - **GitHub repository URL:**   https://github.com/simonkp/IS5126-G4-hotel-analytics
 - Student name(s) Contribution Summary
 
-  | Member                     | ID        | Contribution Area |
-  |----------------------------|-----------|-------------------|
-  | Aryan Jain                 |           |                   |
-  | Manjunath Warad            |           |                   |
-  | Rayaan Nabi Ahmed Quraishi | A0328746R |                   |
-  | Simon Kalayil Philip       | A0332904J |                   |
-  | Yadagiri Spurthi           |           |                   |
+  | Member                     | ID        | Contribution Area                    |
+  |----------------------------|-----------|--------------------------------------|
+  | Aryan Jain                 | A0329300R | System Architecture & Dashboard      |
+  | Manjunath Warad            | A0291515E | Data Prep, EDA, Conclusion           |
+  | Rayaan Nabi Ahmed Quraishi | A0328746R | Performance Profiling & Optimization |
+  | Simon Kalayil Philip       | A0332904J | Data Prep, EDA, Report               |
+  | Yadagiri Spurthi           | A0315000H | Competitive Benchmarking Strategy    |
 
 ---
 
@@ -63,26 +63,28 @@ We built a foundational analytics system with:
 
 ### Indexing Strategy (as used with justification)
 
+To support interactive analytics and repeated aggregation queries, we created indexes on the columns most frequently used for filtering and grouping.
+
 We use **4 indexes** on `reviews`:
 
-1. **idx_reviews_offering** on `(offering_id)` — Supports dashboard and analytics queries that filter or group by hotel (e.g. “reviews for this hotel”, “avg rating by hotel”). Without it, filter-by-offering_id is ~210 ms; with it, ~0.4 ms (**99.8% improvement**).
-2. **idx_reviews_author** on `(author_id)` — Supports author-centric lookups and referential checks.
-3. **idx_reviews_rating_overall** on `(rating_overall)` — Supports filters like “rating ≥ 4” and count/aggregations on rating.
-4. **idx_reviews_offering_rating_clean** on `(offering_id, rating_overall, rating_cleanliness)** — **Covering index** for the common pattern “GROUP BY offering_id” with AVG(rating_overall) and AVG(rating_cleanliness). Without it, SQLite often chooses an index scan plus table lookups (slow); with it, aggregations can be answered from the index only. This yields **96.9%** improvement for “avg rating by hotel” and **96.2%** for “complex aggregation” in our profiling (see Section 4).
+i. **idx_reviews_offering** on `(offering_id)` — Supports dashboard and analytics queries that filter or group by hotel (e.g. “reviews for this hotel”, “avg rating by hotel”). Without it, filter-by-offering_id is ~210 ms; with it, ~0.4 ms (**99.8% improvement**).
+ii. **idx_reviews_author** on `(author_id)` — Supports author-centric lookups and referential checks.
+iii. **idx_reviews_rating_overall** on `(rating_overall)` — Supports filters like “rating ≥ 4” and count/aggregations on rating.
+iv. **idx_reviews_offering_rating_clean** on `(offering_id, rating_overall, rating_cleanliness)** — **Covering index** for the common pattern “GROUP BY offering_id” with AVG(rating_overall) and AVG(rating_cleanliness). Without it, SQLite often chooses an index scan plus table lookups (slow); with it, aggregations can be answered from the index only. This yields **96.9%** improvement for “avg rating by hotel” and **96.2%** for “complex aggregation” in our profiling (see Section 4).
 
 Justification: single-column indexes support point lookups and filters; the covering index avoids expensive table lookups for the main dashboard/analytics aggregations and is justified by the quantified profiling results in `profiling/query_results.txt`.
 
 ### Data Statistics (50K–80K+ review volume)
 
-| Metric | Value |
-|--------|--------|
-| Total reviews (after filtering) | 79,853 |
-| Time period | 2008–2012 (5 years) |
-| Distinct hotels (offerings) | 3,374 |
-| Avg reviews per hotel | ~24 |
-| Sample DB (for TAs) | 5,000+ reviews |
-| Rating field completeness | >99% |
-| Referential integrity | 0 orphaned author records (validated) |
+|              Metric             |                 Value                 |
+|---------------------------------|---------------------------------------|
+| Total reviews (after filtering) | 79,853                                |
+| Time period                     | 2008–2012 (5 years)                   |
+| Distinct hotels (offerings)     | 3,374                                 |
+| Avg reviews per hotel           | ~24                                   |
+| Sample DB (for TAs)             | 5,000+ reviews                        |
+| Rating field completeness       | >99%                                  |
+| Referential integrity           | 0 orphaned author records (validated) |
 
 Data validation (Notebook 01) uses Great Expectations (GX) with a 6-dimension quality framework (Completeness, Uniqueness, Validity, Consistency, Timeliness, Accuracy); analysis proceeds only when GX checks pass.
 
@@ -112,13 +114,13 @@ We profiled **before** (no indexes) and **after** (with indexes) to show **quant
 
 **Results (from `profiling/query_results.txt`):**
 
-| Query | Baseline (ms) | With indexes (ms) | Improvement (%) |
-|-------|----------------|---------------------|------------------|
-| Count all reviews | 0.40 | 0.40 | ~0 (trivial query) |
-| Avg rating by hotel | 341.37 | 10.71 | **96.9** |
-| Filter by rating ≥ 4 | 13.31 | 15.51 | −16.5 (variance; both fast) |
-| Filter by offering_id | 210.45 | 0.40 | **99.8** |
-| Complex aggregation | 294.57 | 11.20 | **96.2** |
+| Query                 | Baseline (ms) | Idx (ms) | Improvement (%)    |
+|-----------------------|---------------|----------|--------------------|
+| Count all reviews     | 0.40          | 0.40     | ~0 (trivial query) |
+| Avg rating by hotel   | 341.37        | 10.71    | **96.9**           |
+| Filter by rating ≥ 4  | 13.31         | 15.51    | −16.5 (both fast)  |
+| Filter by offering_id | 210.45        | 0.40     | **99.8**           |
+| Complex aggregation   | 294.57        | 11.20    | **96.2**           |
 
 **Conclusion:** Indexing yields **96–99% improvement** on the heavy aggregation and point-lookup queries. The covering index is critical for “avg rating by hotel” and “complex aggregation”. EXPLAIN QUERY PLAN (with indexes) is run in the notebook and confirms index usage; full output is in `profiling/query_results.txt`.
 
