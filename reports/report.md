@@ -181,6 +181,37 @@ We justify that **one** clustering approach (K-means + text features + silhouett
 
 ## 6. System Architecture & Dashboard
 
+### System Architecture
+```mermaid
+flowchart LR
+    A[Raw Review Data<br/>data/review.json] --> B[ETL & Filtering Pipeline<br/>src/data_processing.py<br/>--full-etl --target-reviews 80000]
+    B --> C[(SQLite Database<br/>data/reviews.db<br/>80,000 reviews)]
+
+    C --> D[EDA Notebook<br/>02_exploratory_analysis.ipynb]
+    C --> E[Competitive Benchmarking<br/>03_competitive_benchmarking.ipynb]
+    C --> F[Performance Profiling<br/>04_performance_profiling.ipynb]
+    C --> G[Streamlit Dashboard<br/>app/streamlit_app.py]
+
+    D --> H[Technical Report<br/>reports/report.md]
+    E --> H
+    F --> H
+    G --> H
+
+    C --> I[Profiling Artifacts<br/>profiling/query_results.txt<br/>profiling/code_profiling.txt]
+```
+
+The platform follows a three-layer architecture  Data, Analytics, and Presentation  with clear separation of concerns.
+
+![System Architecture](figures/architecture.png)
+
+Data Layer. Raw review data (~1.1 GB JSONL) is ingested through a streaming ETL pipeline (src/data_processing.py) that performs temporal filtering (latest 5 years: 2008–2012) and deterministic sampling (seed=42). The output is a normalized SQLite database with two tables (reviews, authors) and four indexes, including a covering index for GROUP BY aggregation queries. A 5,000-review sample database ships with the repository for reproducibility.
+
+Analytics Layer. Three modules consume data from SQLite. The exploratory analysis (Notebook 02) computes Pearson correlations and statistical tests. The benchmarking engine (src/benchmarking.py) performs text-based feature extraction, K-Means clustering, and ROI-based recommendation generation. The performance profiler (Notebook 04) benchmarks query execution with and without indexes.
+
+Presentation Layer. A Streamlit dashboard (app/streamlit_app.py) serves as the user-facing interface, querying the database via SQLAlchemy and consuming clustering outputs from the benchmarking engine. All expensive computations are cached using @st.cache_data to ensure responsive interaction after first load.
+
+
+
 ### User Interface and Rationale
 
 - **Technology:** Streamlit for a single-page app with sidebar navigation. Rationale: quick to build, runs locally or on a server, no separate front-end stack; suitable for non-technical users (e.g. hotel managers).
