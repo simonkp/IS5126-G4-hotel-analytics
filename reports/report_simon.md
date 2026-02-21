@@ -12,7 +12,7 @@
   |----------------------------|-----------|-------------------|
   | Aryan Jain                 |           |                   |
   | Manjunath Warad            |           |                   |
-  | Rayaan Nabi Ahmed Quraishi |           |                   |
+  | Rayaan Nabi Ahmed Quraishi | A0328746R |                   |
   | Simon Kalayil Philip       | A0332904J |                   |
   | Yadagiri Spurthi           |           |                   |
 
