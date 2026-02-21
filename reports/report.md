@@ -204,6 +204,7 @@ flowchart LR
 
 The platform follows a three-layer architecture: Data, Analytics, and Presentation, with clear separation of concerns.
 
+![System Architecture](figures/architecture.png)
 
 **Data:** ETL (src/data_processing.py) → SQLite (reviews, authors, 4 indexes). **Analytics:** Notebook 02 (EDA), benchmarking.py (clustering, recommendations), Notebook 04 (profiling). **Presentation:** Streamlit dashboard with @st.cache_data.
 
@@ -254,3 +255,4 @@ Queries <30ms (covering index); ML clustering ~26s, cached; color-coded UI (gree
 We would extend the model with deep learning for text analysis (e.g. BERT embeddings for aspect extraction) and LSTM time-series forecasting for rating trends. Longer term, integration with hotel PMS systems for automated data refresh and an A/B testing framework to measure actual ROI of recommendations would validate and improve the business impact.
 
 ---
+
