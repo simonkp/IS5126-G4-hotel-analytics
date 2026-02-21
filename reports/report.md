@@ -10,11 +10,11 @@
 
   | Member                     | ID        | Contribution Area                    |
   |----------------------------|-----------|--------------------------------------|
-  | Aryan Jain                 | A0329300R | System Architecture & Dashboard      |
-  | Manjunath Warad            | A0291515E | Data Prep, EDA, Conclusion           |
-  | Rayaan Nabi Ahmed Quraishi | A0328746R | Performance Profiling & Optimization |
-  | Simon Kalayil Philip       | A0332904J | Data Prep, EDA, Report               |
-  | Yadagiri Spurthi           | A0315000H | Competitive Benchmarking Strategy    |
+  | Aryan Jain                 | A0329300R | Feature Engineering, System Architecture, Text Extraction Logic & Dashboard |
+  | Manjunath Warad            | A0291515E | Data Prep, ETL, Database Design, Business Strategy & Indexing Strategy     |
+  | Rayaan Nabi Ahmed Quraishi | A0328746R | K-Means Clustering, Cluster Validation & Recommendation Logic |
+  | Simon Kalayil Philip       | A0332904J | EDA, Dashboard Insights, Business Insights, Performance Profiling & Optimization         |
+  | Yadagiri Spurthi           | A0315000H | Competitive Benchmarking Strategy & Data Quality Validation   |
 
 ---
 
